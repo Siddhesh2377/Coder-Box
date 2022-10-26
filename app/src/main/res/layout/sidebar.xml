@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <eightbitlab.com.blurview.BlurView
+        android:id="@+id/bg_sidebar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/sidebar_bg_main"
+        android:orientation="horizontal"
+        android:padding="4dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:background="@drawable/sidebar_icons_bg"
+                android:elevation="8dp"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="8dp"
+                    app:srcCompat="@drawable/user_panel" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="4dp"
+                android:background="@drawable/sidebar_icons_bg"
+                android:elevation="8dp"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="27dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="8dp"
+                    app:srcCompat="@drawable/grid" />
+
+                <ImageView
+                    android:layout_width="27dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="8dp"
+                    app:srcCompat="@drawable/search" />
+
+                <ImageView
+                    android:id="@+id/btn_setting_sidebar"
+                    android:layout_width="27dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="8dp"
+                    app:srcCompat="@drawable/settings" />
+
+                <ImageView
+                    android:layout_width="27dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="8dp"
+                    app:srcCompat="@drawable/files" />
+
+                <ImageView
+                    android:layout_width="27dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="8dp"
+                    app:srcCompat="@drawable/notifications" />
+            </LinearLayout>
+        </LinearLayout>
+    </eightbitlab.com.blurview.BlurView>
+
+</LinearLayout>

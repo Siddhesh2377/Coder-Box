@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center">
+
+    <eightbitlab.com.blurview.BlurView
+        android:id="@+id/floating_dock_bg"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:background="#C4FFFFFF"
+        android:elevation="12dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@drawable/flotingdock_max_left"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="35dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/resents_icon"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        app:srcCompat="@drawable/control_panel" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/lines_bg"
+                    android:orientation="horizontal" />
+
+                <LinearLayout
+                    android:id="@+id/btn_box"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="#FFFFFFFF"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:orientation="vertical"
+                    android:padding="3dp">
+
+                    <ImageView
+                        android:id="@+id/apps_ic"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginTop="6dp"
+                        app:srcCompat="@drawable/grid" />
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="15dp" />
+
+                    <ImageView
+                        android:id="@+id/resent_apps_ic"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        app:srcCompat="@drawable/background_services" />
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="15dp" />
+
+                    <ImageView
+                        android:id="@+id/shaortcut_ic"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        app:srcCompat="@drawable/saved_shortcuts" />
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="15dp" />
+
+                    <ImageView
+                        android:id="@+id/Cc_ic"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginBottom="6dp"
+                        app:srcCompat="@drawable/user_panel"
+                        app:tint="#909AFF" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/lines_bg"
+                    android:orientation="horizontal" />
+
+                <LinearLayout
+                    android:id="@+id/slide_diss_bg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="bottom|center_horizontal"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/clean_back_bg"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_margin="8dp"
+                        android:background="#8B81FF"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
+                            app:srcCompat="@drawable/clean" />
+                    </LinearLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:background="@drawable/flotingdock_max_top"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <Space
+                        android:layout_width="16dp"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/window_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/tommarow"
+                        android:text="Device Apps"
+                        android:textAlignment="center"
+                        android:textColor="#6A6A6A"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <androidx.gridlayout.widget.GridLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:orientation="vertical">
+
+                        <GridView
+                            android:id="@+id/task_grid"
+                            android:layout_width="match_parent"
+                            android:layout_height="500dp"
+                            android:numColumns="4"
+                            android:stretchMode="columnWidth" />
+                    </androidx.gridlayout.widget.GridLayout>
+
+                    <LinearLayout
+                        android:id="@+id/bg_cc_base"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/back__"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:layout_margin="12dp"
+                            android:background="@drawable/bg_cc_account"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <de.hdodenhof.circleimageview.CircleImageView
+                                android:id="@+id/profile_image"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_margin="8dp"
+                                android:src="@drawable/profile"
+                                app:civ_border_color="#3EFFFFFF"
+                                app:civ_border_width="2dp" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_margin="4dp"
+                                android:gravity="center_vertical"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:fontFamily="@font/tommarow"
+                                    android:text="S.P.SONAR"
+                                    android:textColor="#262626"
+                                    android:textSize="14sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:fontFamily="@font/tommarow"
+                                    android:text="siddheshsonar@gmail.com"
+                                    android:textColor="#262626"
+                                    android:textSize="10sp" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/Tiles_bg"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="12dp"
+                            android:background="@drawable/bg_cc_account"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="70dp"
+                                android:gravity="center"
+                                android:orientation="horizontal">
+
+                                <LinearLayout
+                                    android:id="@+id/wifi_btn"
+                                    android:layout_width="30dp"
+                                    android:layout_height="30dp"
+                                    android:background="@drawable/wifi_bg_on"
+                                    android:elevation="5dp"
+                                    android:gravity="center"
+                                    android:orientation="horizontal"
+                                    android:padding="6dp">
+
+                                    <ImageView
+                                        android:layout_width="20dp"
+                                        android:layout_height="20dp"
+                                        app:srcCompat="@drawable/wifi" />
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:id="@+id/bluetooth_btn"
+                                    android:layout_width="30dp"
+                                    android:layout_height="30dp"
+                                    android:layout_marginStart="25dp"
+                                    android:background="@drawable/wifi_bg_on"
+                                    android:elevation="5dp"
+                                    android:gravity="center"
+                                    android:orientation="horizontal"
+                                    android:padding="6dp">
+
+                                    <ImageView
+                                        android:layout_width="20dp"
+                                        android:layout_height="20dp"
+                                        app:srcCompat="@drawable/bluetooth" />
+
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="30dp"
+                                    android:layout_height="30dp"
+                                    android:layout_marginStart="25dp"
+                                    android:background="@drawable/otherecomp"
+                                    android:elevation="5dp"
+                                    android:gravity="center"
+                                    android:orientation="horizontal">
+
+                                    <ImageView
+                                        android:id="@+id/cell_data_btn"
+                                        android:layout_width="20dp"
+                                        android:layout_height="20dp"
+                                        app:srcCompat="@drawable/airplay"
+                                        app:tint="#FF8181" />
+                                </LinearLayout>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_marginBottom="4dp"
+                                    android:gravity="center_vertical"
+                                    android:orientation="horizontal">
+
+                                    <LinearLayout
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="match_parent"
+                                        android:layout_marginStart="12dp"
+                                        android:gravity="center_vertical"
+                                        android:orientation="vertical">
+
+                                        <LinearLayout
+                                            android:layout_width="30dp"
+                                            android:layout_height="30dp"
+                                            android:layout_margin="8dp"
+                                            android:background="@drawable/otherecomp"
+                                            android:elevation="3dp"
+                                            android:gravity="center"
+                                            android:orientation="horizontal">
+
+                                            <ImageView
+                                                android:id="@+id/dnd_btn"
+                                                android:layout_width="20dp"
+                                                android:layout_height="20dp"
+                                                app:srcCompat="@drawable/dnd"
+                                                app:tint="#8B81FF" />
+                                        </LinearLayout>
+
+                                        <LinearLayout
+                                            android:layout_width="30dp"
+                                            android:layout_height="30dp"
+                                            android:layout_margin="8dp"
+                                            android:background="@drawable/otherecomp"
+                                            android:elevation="3dp"
+                                            android:gravity="center"
+                                            android:orientation="horizontal">
+
+                                            <ImageView
+                                                android:id="@+id/background_btn"
+                                                android:layout_width="20dp"
+                                                android:layout_height="20dp"
+                                                app:srcCompat="@drawable/system_info"
+                                                app:tint="#00A3FF" />
+                                        </LinearLayout>
+                                    </LinearLayout>
+
+
+                                    <LinearLayout
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="match_parent"
+                                        android:gravity="center_vertical"
+                                        android:orientation="vertical">
+
+                                        <LinearLayout
+                                            android:layout_width="30dp"
+                                            android:layout_height="30dp"
+                                            android:layout_margin="8dp"
+                                            android:background="@drawable/otherecomp"
+                                            android:elevation="3dp"
+                                            android:gravity="center"
+                                            android:orientation="horizontal">
+
+                                            <ImageView
+                                                android:id="@+id/dark_btn"
+                                                android:layout_width="20dp"
+                                                android:layout_height="20dp"
+                                                app:srcCompat="@drawable/theme_mod"
+                                                app:tint="#7F7F7F" />
+                                        </LinearLayout>
+
+                                        <LinearLayout
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="match_parent"
+                                            android:gravity="center_vertical"
+                                            android:orientation="vertical">
+
+                                            <LinearLayout
+                                                android:layout_width="30dp"
+                                                android:layout_height="30dp"
+                                                android:layout_margin="8dp"
+                                                android:background="@drawable/otherecomp"
+                                                android:elevation="3dp"
+                                                android:gravity="center"
+                                                android:orientation="horizontal">
+
+                                                <ImageView
+                                                    android:id="@+id/more_btn"
+                                                    android:layout_width="20dp"
+                                                    android:layout_height="20dp"
+                                                    app:srcCompat="@drawable/rotation" />
+                                            </LinearLayout>
+                                        </LinearLayout>
+
+
+                                    </LinearLayout>
+
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:gravity="center_horizontal"
+                                        android:orientation="vertical">
+
+                                        <LinearLayout
+                                            android:layout_width="172dp"
+                                            android:layout_height="55dp"
+                                            android:gravity="center"
+                                            android:orientation="horizontal">
+
+                                            <LinearLayout
+                                                android:layout_width="40dp"
+                                                android:layout_height="40dp"
+                                                android:background="@drawable/otherecomp"
+                                                android:elevation="3dp"
+                                                android:gravity="center"
+                                                android:orientation="horizontal">
+
+                                                <ImageView
+                                                    android:id="@+id/widget_btn"
+                                                    android:layout_width="20dp"
+                                                    android:layout_height="20dp"
+                                                    app:srcCompat="@drawable/desktops"
+                                                    app:tint="#7F7F7F" />
+                                            </LinearLayout>
+
+                                            <LinearLayout
+                                                android:layout_width="40dp"
+                                                android:layout_height="40dp"
+                                                android:layout_marginStart="20dp"
+                                                android:background="@drawable/otherecomp"
+                                                android:elevation="3dp"
+                                                android:gravity="center"
+                                                android:orientation="horizontal">
+
+                                                <ImageView
+                                                    android:id="@+id/archive_btn"
+                                                    android:layout_width="20dp"
+                                                    android:layout_height="20dp"
+                                                    app:srcCompat="@drawable/archive"
+                                                    app:tint="#7F7F7F" />
+                                            </LinearLayout>
+
+                                        </LinearLayout>
+
+                                        <RelativeLayout
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent">
+
+                                            <ProgressBar
+                                                android:id="@+id/battery_idi"
+                                                style="?android:attr/progressBarStyleHorizontal"
+                                                android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                                                android:layout_centerInParent="true"
+                                                android:layout_margin="8dp"
+                                                android:max="100"
+                                                android:progress="30"
+                                                android:progressDrawable="@drawable/custom_progressbar" />
+
+                                            <!-- TextView with transparent background -->
+                                            <TextView
+                                                android:id="@+id/battery_idi_txt"
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:layout_centerInParent="true"
+                                                android:background="#00000000"
+                                                android:fontFamily="@font/viga"
+                                                android:text="30%"
+                                                android:textAlignment="center"
+                                                android:textColor="#484848"
+                                                android:textSize="8sp" />
+
+                                            <ImageView
+                                                android:layout_width="10dp"
+                                                android:layout_height="10dp"
+                                                android:layout_centerVertical="true"
+                                                android:layout_marginStart="15dp"
+                                                app:srcCompat="@drawable/battery"
+                                                app:tint="#7F7F7F" />
+                                        </RelativeLayout>
+
+
+                                    </LinearLayout>
+
+
+                                </LinearLayout>
+
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="12dp"
+                                android:background="@drawable/bg_cc_account"
+                                android:orientation="vertical"
+                                android:padding="6dp">
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal">
+
+
+                                    <SeekBar
+                                        android:layout_width="match_parent"
+                                        android:layout_height="40dp"
+                                        android:max="100"
+                                        android:progress="40"
+                                        android:progressDrawable="@drawable/brighthness_progress_seekbar"
+                                        android:splitTrack="false"
+                                        android:thumb="@color/Transperent" />
+
+                                    <ImageView
+                                        android:layout_width="12dp"
+                                        android:layout_height="12dp"
+                                        android:translationX="-175dp"
+                                        android:translationY="14dp"
+                                        app:srcCompat="@drawable/brightness" />
+
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="8dp"
+                                    android:orientation="horizontal">
+
+                                    <SeekBar
+                                        android:layout_width="match_parent"
+                                        android:layout_height="40dp"
+                                        android:max="100"
+                                        android:progress="40"
+                                        android:progressDrawable="@drawable/volume_progress_seekbar"
+                                        android:splitTrack="false"
+                                        android:thumb="@color/Transperent" />
+
+                                    <ImageView
+                                        android:layout_width="12dp"
+                                        android:layout_height="12dp"
+                                        android:translationX="-175dp"
+                                        android:translationY="14dp"
+                                        app:srcCompat="@drawable/volume" />
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/bottom_controller_bg"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/bottom_bar"
+                android:layout_width="150dp"
+                android:layout_height="5dp"
+                android:background="@drawable/bottom_controller_bg_btn"
+                android:orientation="vertical" />
+
+        </LinearLayout>
+
+
+    </eightbitlab.com.blurview.BlurView>
+</LinearLayout>

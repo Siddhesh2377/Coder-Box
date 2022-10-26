@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <eightbitlab.com.blurview.BlurView
+        android:id="@+id/settings_dialog_bg"
+        android:layout_width="350dp"
+        android:layout_height="650dp"
+        android:elevation="12dp"
+        android:orientation="horizontal"
+        android:padding="4dp">
+
+        <LinearLayout
+            android:layout_width="289dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="right"
+            android:background="@drawable/settings_apperance_bg_main"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:gravity="center|center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/tommarow"
+                    android:text="Select Theme"
+                    android:textColor="#686868"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Space
+                    android:layout_width="52dp"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ADD THEME"
+                    android:textColor="#00A3FF"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="157dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+
+                <com.makeramen.roundedimageview.RoundedImageView
+                    android:id="@+id/setting_theme_light"
+                    android:layout_width="90dp"
+                    android:layout_height="90dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/defult_wallpaper"
+                    app:riv_border_color="#2196F3"
+                    app:riv_border_width="2dip"
+                    app:riv_corner_radius="4dip" />
+
+                <Space
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content" />
+
+                <com.makeramen.roundedimageview.RoundedImageView
+                    android:id="@+id/setting_theme_dark"
+                    android:layout_width="90dp"
+                    android:layout_height="90dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/defult_wallpaper"
+                    app:riv_border_color="#2196F3"
+                    app:riv_border_width="0dip"
+                    app:riv_corner_radius="4dip" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="425dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="22dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/tommarow"
+                            android:text="ICONS PATH"
+                            android:textColor="#FF8181"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="12dp" />
+
+                    <LinearLayout
+                        android:layout_width="247dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_edittext_input"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="25dp"
+                            android:layout_height="30dp"
+                            android:layout_margin="8dp"
+                            app:srcCompat="@drawable/files" />
+
+                        <Space
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <EditText
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="#00FFFFFF"
+                            android:hint="MK_DARK/icons/.icon.info"
+                            android:inputType="none|textPersonName"
+                            android:textColor="#494949"
+                            android:textColorHint="#807D7D"
+                            android:textSize="14dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="22dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/tommarow"
+                            android:text="COLOR PATH"
+                            android:textColor="#FF8181"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="12dp" />
+
+                    <LinearLayout
+                        android:layout_width="247dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_edittext_input"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="25dp"
+                            android:layout_height="30dp"
+                            android:layout_margin="8dp"
+                            app:srcCompat="@drawable/files" />
+
+                        <Space
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <EditText
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="#00FFFFFF"
+                            android:hint="MK_DARK/icons/.icon.info"
+                            android:inputType="none|textPersonName"
+                            android:textColor="#494949"
+                            android:textColorHint="#807D7D"
+                            android:textSize="14dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="22dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/tommarow"
+                            android:text="XR FILE PATH"
+                            android:textColor="#FF8181"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="12dp" />
+
+                    <LinearLayout
+                        android:layout_width="247dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_edittext_input"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="25dp"
+                            android:layout_height="30dp"
+                            android:layout_margin="8dp"
+                            app:srcCompat="@drawable/files" />
+
+                        <Space
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <EditText
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="#00FFFFFF"
+                            android:hint="MK_DARK/icons/.icon.info"
+                            android:inputType="none|textPersonName"
+                            android:textColor="#494949"
+                            android:textColorHint="#807D7D"
+                            android:textSize="14dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="22dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/tommarow"
+                            android:text="WALLPAPER PATH"
+                            android:textColor="#FF8181"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="12dp" />
+
+                    <LinearLayout
+                        android:layout_width="247dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_edittext_input"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="25dp"
+                            android:layout_height="30dp"
+                            android:layout_margin="8dp"
+                            app:srcCompat="@drawable/files" />
+
+                        <Space
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <EditText
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="#00FFFFFF"
+                            android:hint="MK_DARK/icons/.icon.info"
+                            android:inputType="none|textPersonName"
+                            android:textColor="#494949"
+                            android:textColorHint="#807D7D"
+                            android:textSize="14dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp" />
+
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/img_acc"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="25dp"
+                android:backgroundTint="#505050"
+                android:backgroundTintMode="add"
+                app:srcCompat="@drawable/app_icon" />
+
+            <ImageView
+                android:id="@+id/img_app"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="25dp"
+                app:srcCompat="@drawable/app_icon" />
+        </LinearLayout>
+    </eightbitlab.com.blurview.BlurView>
+</LinearLayout>

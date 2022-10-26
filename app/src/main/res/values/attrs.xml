@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="WorkSpaceLayout">
+        <attr name="Image" format="reference" />
+        <attr name="Text" format="string" />
+        <attr name="TextSize" format="integer" />
+    </declare-styleable>
+</resources>
