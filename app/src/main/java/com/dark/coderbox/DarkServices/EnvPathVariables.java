@@ -21,4 +21,5 @@ public class EnvPathVariables {
     public static String COLOR_PRIMARY = GetThemeInfo(SYSTEM_THEME, Keys.MODS.THEME_COLORS, Keys.THEMES.ThemeColors.Primary);
     public static String COLOR_SECONDARY = GetThemeInfo(SYSTEM_THEME, Keys.MODS.THEME_COLORS, Keys.THEMES.ThemeColors.Secondary);
     public static String COLOR_TERTIARY = GetThemeInfo(SYSTEM_THEME, Keys.MODS.THEME_COLORS, Keys.THEMES.ThemeColors.Tertiary);
+    public static String C = "";
 }
