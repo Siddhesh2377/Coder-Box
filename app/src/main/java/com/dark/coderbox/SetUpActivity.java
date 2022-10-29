@@ -50,29 +50,29 @@ public class SetUpActivity extends AppCompatActivity {
         FileUtil.makeDir(getExternalStorageDir().concat("/CBRoot/CBRData/SystemData"));
         FileUtil.makeDir(getExternalStorageDir().concat("/CBRoot/SYSTEM/THEMES"));
         SYSTEM_FILE(Generate_XR_LIST_SYSTEM, this);
-        try {
-            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(Html.fromHtml() + ""));
-            request.setTitle(title);
-            // in order for this if to run, you must use the android 3.2 to compile your app
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                request.allowScanningByMediaScanner();
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-            }
-
-//                    request.setDestinationInExternalFilesDir(context,Environment.DIRECTORY_DOWNLOADS, "ALSupermarket");
-            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
-            // // get download service and enqueue file
-            manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-            long index = manager.enqueue(request);
-            context.registerReceiver(receiver_complete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-
-//                    manager.openDownloadedFile(index);
-//                    uri = manager.getUriForDownloadedFile(index);
-//                    Log.d("downloading url = ", uri.toString());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(Html.fromHtml() + ""));
+//            request.setTitle(title);
+//            // in order for this if to run, you must use the android 3.2 to compile your app
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+//                request.allowScanningByMediaScanner();
+//                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+//            }
+//
+////                    request.setDestinationInExternalFilesDir(context,Environment.DIRECTORY_DOWNLOADS, "ALSupermarket");
+//            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
+//            // // get download service and enqueue file
+//            manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+//            long index = manager.enqueue(request);
+//            context.registerReceiver(receiver_complete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+//
+////                    manager.openDownloadedFile(index);
+////                    uri = manager.getUriForDownloadedFile(index);
+////                    Log.d("downloading url = ", uri.toString());
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         unzip("THEMES.zip", SYSTEM_FOLDER + "THEMES");
         ShowMessage("Completed", this);
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
