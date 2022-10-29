@@ -1,12 +1,9 @@
 package com.dark.coderbox;
 
 import static com.dark.coderbox.DarkServices.DarkRootServices.GetBackGroundServicesList;
-//import static com.dark.coderbox.DarkServices.DarkUtils.CopyAssets/;
 import static com.dark.coderbox.DarkServices.DarkUtils.ShowMessage;
-import static com.dark.coderbox.DarkServices.EnvPathVariables.APPLIED_THEME;
-import static com.dark.coderbox.DarkServices.EnvPathVariables.COLOR_BASE;
+import static com.dark.coderbox.DarkServices.EnvPathVariables.DEFAULT_WALLPAPER;
 import static com.dark.coderbox.DarkServices.EnvPathVariables.SYSTEM_DATA_FILE;
-import static com.dark.coderbox.DarkServices.EnvPathVariables.THEMES_FOLDER;
 import static com.dark.coderbox.DarkServices.NearbyDevices.DestroyConnection;
 import static com.dark.coderbox.DarkServices.NearbyDevices.IsHotSpotOn;
 import static com.dark.coderbox.DarkServices.ThemeMannager.ThemeModule.ANIM_FADEOUT;
@@ -17,9 +14,6 @@ import static com.dark.coderbox.libs.FileUtil.getExternalStorageDir;
 import static com.dark.coderbox.libs.Keys.MODS.SYSTEM_XR;
 import static com.dark.coderbox.libs.Keys.XRLanguages.GET_VOLUME;
 import static com.dark.coderbox.libs.LanguageXR.WriteSystemInfo;
-import static com.dark.coderbox.libs.Setup.THEMES.Add_Themes;
-import static com.dark.coderbox.libs.Setup.THEMES.GetThemeInfo;
-import static com.dark.coderbox.libs.Setup.THEMES.IsThemeExist;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -82,7 +76,6 @@ import com.budiyev.android.codescanner.CodeScannerView;
 import com.budiyev.android.codescanner.DecodeCallback;
 import com.dark.coderbox.DarkServices.DarkUtils;
 import com.dark.coderbox.libs.FileUtil;
-import com.dark.coderbox.libs.Keys;
 import com.dark.coderbox.libs.LanguageXR;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
@@ -90,7 +83,6 @@ import com.google.gson.reflect.TypeToken;
 import com.google.zxing.Result;
 import com.makeramen.roundedimageview.RoundedImageView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -105,8 +97,12 @@ import eightbitlab.com.blurview.RenderScriptBlur;
 @RequiresApi(api = Build.VERSION_CODES.S)
 @SuppressLint("ClickableViewAccessibility")
 public class MainActivity extends AppCompatActivity {
-
-
+    public static String COLOR_ACCENT;
+    public static String COLOR_BASE = "FFFFFF";
+    public static String COLOR_DOMINANT = "2E2E2E";
+    public static String COLOR_PRIMARY;
+    public static String COLOR_SECONDARY;
+    public static String COLOR_TERTIARY;
     //Arrays
     public final ArrayList<String> list = new ArrayList<>();
     public final ArrayList<String> folderList = new ArrayList<>();
@@ -116,7 +112,6 @@ public class MainActivity extends AppCompatActivity {
     public final ArrayList<Drawable> Generate_APPS_Icons_LIST = new ArrayList<>();
     public final ArrayList<String> Generate_APPS_Name_LIST = new ArrayList<>();
     public final ArrayList<HashMap<String, Object>> Generate_APPS_LIST = new ArrayList<>();
-
     //Strings
     public String base_color = "#FFFFFFFF";
 
@@ -209,11 +204,11 @@ public class MainActivity extends AppCompatActivity {
 //                            e.printStackTrace();
 //                        }
 
-                        if (IsThemeExist("MK_DARK")) {
-                            ShowMessage("MK_DARK : Theme Exist !", this);
-                        } else {
-                            Add_Themes(THEMES_FOLDER.concat("MK_DARK.zip"), this);
-                        }
+//                        if (IsThemeExist("MK_DARK")) {
+//                            ShowMessage("MK_DARK : Theme Exist !", this);
+//                        } else {
+//                            Add_Themes(THEMES_FOLDER.concat("MK_DARK.zip"), this);
+//                        }
 
                     }
 
@@ -277,6 +272,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onPause() {
+
         super.onPause();
     }
 
@@ -285,9 +281,10 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    @SuppressLint("SuspiciousIndentation")
     public void SetupLogic() {
         FullScreen_call();
-        Bitmap myBitmap = BitmapFactory.decodeFile(THEMES_FOLDER + APPLIED_THEME + "/Wallpapers" + GetThemeInfo("MK_LIGHT", Keys.MODS.THEME_WALLPAPERS, Keys.THEMES.ThemeWallpapers.defaultWallpaper));
+        Bitmap myBitmap = BitmapFactory.decodeFile(DEFAULT_WALLPAPER);
         img.setImageBitmap(myBitmap);
         LoadApps();
         GetBackGroundServicesList(GetBackgroundList, this);
@@ -352,10 +349,10 @@ public class MainActivity extends AppCompatActivity {
 
         RecyclerView Floating_dock_app = displayView.findViewById(R.id.fd_a);
 
-        SetFilter(lock_, COLOR_BASE, 1);
-        SetFilter(Speed_box, COLOR_BASE, 1);
-        SetFilter(ico, COLOR_BASE, 0);
-        SetFilter(resent_services, COLOR_BASE, 1);
+        SetFilter(lock_, "#FF" + COLOR_BASE, 1);
+        SetFilter(Speed_box, "#FF" + COLOR_BASE, 1);
+        SetFilter(ico, "#FF" + COLOR_BASE, 0);
+        SetFilter(resent_services, "#FF" + COLOR_BASE, 1);
 
 
         headerBlur.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 80));
@@ -412,7 +409,7 @@ public class MainActivity extends AppCompatActivity {
         // Green -->  #FF24FF00
         // Red   -->  #FFFF5B5B
 
-        SetBackData(60, "#BF" + GetThemeInfo("MK_LIGHT", Keys.MODS.THEME_COLORS, Keys.THEMES.ThemeColors.Dominant), 1, "#FFF4D1", headerBlur);
+        SetBackData(60, "#BF" + COLOR_DOMINANT, 1, "#FFF4D1", headerBlur);
 
         ico.setOnClickListener(view -> {
             if (v_floating_dock_shortcuts == View.VISIBLE) {
@@ -839,15 +836,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void FullScreen_call() {
-        if (Build.VERSION.SDK_INT > 11 && Build.VERSION.SDK_INT < 19) { // lower api
-            View v = this.getWindow().getDecorView();
-            v.setSystemUiVisibility(View.GONE);
-        } else if (Build.VERSION.SDK_INT >= 19) {
-            //for new api versions.
-            View decorView = getWindow().getDecorView();
-            int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-            decorView.setSystemUiVisibility(uiOptions);
-        }
+//        View decorView = getWindow().getDecorView();
+//        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+//        decorView.setSystemUiVisibility(uiOptions);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
     }
 
     public void BlurTheLayout(BlurView blurView, int blur) {

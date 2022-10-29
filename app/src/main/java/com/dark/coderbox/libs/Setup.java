@@ -1,27 +1,20 @@
 package com.dark.coderbox.libs;
 
-//import static com.dark.coderbox.DarkServices.DarkUtils.CopyAssets;
 import static com.dark.coderbox.DarkServices.DarkUtils.ShowMessage;
 import static com.dark.coderbox.DarkServices.DarkUtils.unzip;
-import static com.dark.coderbox.DarkServices.EnvPathVariables.SYSTEM_DATA_FILE;
-import static com.dark.coderbox.DarkServices.EnvPathVariables.SYSTEM_THEME;
 import static com.dark.coderbox.DarkServices.EnvPathVariables.THEMES_FOLDER;
 import static com.dark.coderbox.DarkServices.EnvPathVariables.THEME_PATH_FILE;
 import static com.dark.coderbox.libs.FileUtil.getExternalStorageDir;
 import static com.dark.coderbox.libs.FileUtil.getFileLength;
 import static com.dark.coderbox.libs.FileUtil.isExistFile;
 import static com.dark.coderbox.libs.FileUtil.writeFile;
-import static com.dark.coderbox.libs.Temp.SYSTEM.SYSTEM_FILE;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class Setup {
@@ -42,7 +35,7 @@ public class Setup {
             unzip(path, THEMES_FOLDER);
             Generated_Theme_list.add(current_theme);
             if (isExistFile(THEME_PATH_FILE) && getFileLength(THEME_PATH_FILE) != 0) {
-                if (!IsThemeExist(current_theme)) {
+                if (IsThemeExist(current_theme)) {
                     Generated_Theme_list.clear();
                     Generated_Theme_list = new Gson().fromJson(FileUtil.readFile(THEME_PATH_FILE), new TypeToken<ArrayList<String>>() {
                     }.getType());
@@ -59,19 +52,25 @@ public class Setup {
         }
 
         public static boolean IsThemeExist(String theme) {
-            Generated_Theme_list = new Gson().fromJson(FileUtil.readFile(THEME_PATH_FILE), new TypeToken<ArrayList<String>>() {
-            }.getType());
-            Generated_Theme_list.clear();
-            Generated_Theme_list = new Gson().fromJson(FileUtil.readFile(THEME_PATH_FILE), new TypeToken<ArrayList<String>>() {
-            }.getType());
-            return Generated_Theme_list.contains(theme);
+            boolean val;
+            if (isExistFile(THEME_PATH_FILE)) {
+                Generated_Theme_list = new Gson().fromJson(FileUtil.readFile(THEME_PATH_FILE), new TypeToken<ArrayList<String>>() {
+                }.getType());
+                Generated_Theme_list.clear();
+                Generated_Theme_list = new Gson().fromJson(FileUtil.readFile(THEME_PATH_FILE), new TypeToken<ArrayList<String>>() {
+                }.getType());
+                val = Generated_Theme_list.contains(theme);
+            } else {
+                val = false;
+            }
+            return !val;
         }
 
         public static String GetThemeInfo(String Theme, String mod, String info) {
             String val = "void";
             String path = getExternalStorageDir().concat("/CBRoot/SYSTEM/THEMES/".concat(Theme).concat("/Data.json"));
             String ThemeRoot = getExternalStorageDir().concat("/CBRoot/SYSTEM/THEMES/".concat(Theme));
-            if (!IsThemeExist(Theme)) {
+            if (IsThemeExist(Theme)) {
                 Generated_INFO = new Gson().fromJson(FileUtil.readFile(path), new TypeToken<ArrayList<String>>() {
                 }.getType());
                 if (mod.equals("MK.TH432876.COLORS")) {
@@ -228,16 +227,5 @@ public class Setup {
 
             return val;
         }
-
-        public static String getCurrentTheme() {
-            Log.e("CURRENT THEME >>  Bro", FileUtil.readFile(SYSTEM_THEME));
-            Current_Theme_Info = new Gson().fromJson(FileUtil.readFile(SYSTEM_THEME), new TypeToken<ArrayList<String>>() {
-            }.getType());
-          //  Current_Theme_Info.clear();
-            Current_Theme_Info = new Gson().fromJson(FileUtil.readFile(SYSTEM_THEME), new TypeToken<ArrayList<String>>() {
-            }.getType());
-            return Current_Theme_Info.get(4);
-        }
-
     }
 }

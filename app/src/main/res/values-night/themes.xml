@@ -26,8 +26,4 @@
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
     </style>
-
-    <style name="NoStatusBar" parent="AppTheme">
-        <item name="android:windowFullscreen">true</item>
-    </style>
 </resources>
