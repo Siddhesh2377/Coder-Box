@@ -28,7 +28,7 @@ public class DarkUtils {
         AssetManager assetManager = context.getAssets();
         String[] files = null;
         try {
-            files = assetManager.list("THEMES.zip");
+            files = assetManager.list("THEMES_Main.zip");
         } catch (IOException e) {
             Log.e("tag", "Failed to get asset file list.", e);
         }
@@ -79,7 +79,7 @@ public class DarkUtils {
             }
             zin.close();
         } catch (java.io.IOException e) {
-            e.printStackTrace();
+           Log.e("Unzipping System Data : ", e.toString());
         }
     }
 

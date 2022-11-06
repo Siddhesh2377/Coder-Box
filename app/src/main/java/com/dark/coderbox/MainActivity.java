@@ -1,5 +1,6 @@
 package com.dark.coderbox;
 
+import static android.app.ActivityOptions.makeSceneTransitionAnimation;
 import static com.dark.coderbox.DarkServices.DarkRootServices.GetBackGroundServicesList;
 import static com.dark.coderbox.DarkServices.DarkUtils.ShowMessage;
 import static com.dark.coderbox.DarkServices.EnvPathVariables.DEFAULT_WALLPAPER;
@@ -16,6 +17,7 @@ import static com.dark.coderbox.libs.Keys.XRLanguages.GET_VOLUME;
 import static com.dark.coderbox.libs.LanguageXR.WriteSystemInfo;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityOptions;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -118,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
     //Booleans
     public boolean Show_DOCK = false;
     public boolean All_Permissions_OK = false;
-
     //Components
     public AlertDialog settings_dialog;
     public Timer timer_ = new Timer();
@@ -133,23 +134,27 @@ public class MainActivity extends AppCompatActivity {
     public WindowManager windowManager;
     public WindowManager.LayoutParams layoutParams;
     public View displayView;
-
     //Numerical
     public double index = 0;
     public double y1 = 0;
     public double x1 = 0;
     public double y2 = 0;
     public double x2 = 0;
-
     //Int
     public int count_F_D_M = 0;
     public int v_floating_dock_shortcuts = View.VISIBLE;
     public int H = 0;
-
     private LinearLayout bg_main;
     private LinearLayout controls_border;
     private ImageView img;
 
+    public boolean isHomeApp() {
+        final Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        final ResolveInfo res = getPackageManager().resolveActivity(intent, 0);
+        return res.activityInfo != null && getPackageName()
+                .equals(res.activityInfo.packageName);
+    }
 
     @SuppressLint({"ClickableViewAccessibility", "MissingInflatedId"})
     @Override
@@ -165,20 +170,20 @@ public class MainActivity extends AppCompatActivity {
 
         //Logic
         All_Permissions_OK = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-
-        if (All_Permissions_OK) {
-            //Setting Wallpaper
-//            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//                final WallpaperManager wallpaperManager = WallpaperManager.getInstance(this);
-//                @SuppressLint("MissingPermission") final Drawable wallpaperDrawable = wallpaperManager.getDrawable();
-//                img.setImageDrawable(wallpaperDrawable);
-//            } else {
-//                img.setImageResource(R.drawable.defult_wallpaper);
-//            }
-
-            //Initializing Syste
-            SetupLogic();
-        }
+        SetupLogic();
+        //        if (All_Permissions_OK) {
+//            //Setting Wallpaper
+////            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+////                final WallpaperManager wallpaperManager = WallpaperManager.getInstance(this);
+////                @SuppressLint("MissingPermission") final Drawable wallpaperDrawable = wallpaperManager.getDrawable();
+////                img.setImageDrawable(wallpaperDrawable);
+////            } else {
+////                img.setImageResource(R.drawable.defult_wallpaper);
+////            }
+//
+//            //Initializing Syste
+//
+//        }
 
 
         bg_main.setOnTouchListener((view, p2) -> {
@@ -198,27 +203,14 @@ public class MainActivity extends AppCompatActivity {
 
                     //DOWN
                     if (((y1 - y2) < -250)) {
-//                        try {
-//                      //      CopyAssets(THEMES_FOLDER, "MK_DARK.zip", this);
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-
-//                        if (IsThemeExist("MK_DARK")) {
-//                            ShowMessage("MK_DARK : Theme Exist !", this);
-//                        } else {
-//                            Add_Themes(THEMES_FOLDER.concat("MK_DARK.zip"), this);
-//                        }
-
+                        ShowUserPanel();
                     }
 
                     //UP
                     if (((y2 - y1) < -250)) {
 
                         if (!Show_DOCK) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                Show_System_Dock();
-                            }
+                            Show_System_Dock();
                             Show_DOCK = true;
                         }
 
@@ -246,29 +238,27 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
+//        if (!isHomeApp())
+//            startActivity(new Intent(Settings.ACTION_HOME_SETTINGS));
+
     }
 
     public void onStart() {
-
+        Close_System_Dock();
+        Show_System_Dock();
         super.onStart();
     }
 
     public void onResume() {
         super.onResume();
-        if (All_Permissions_OK) {
-            Close_System_Dock();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Show_System_Dock();
-            }
-            Show_DOCK = true;
-            LoadApps();
-            GetBackGroundServicesList(GetBackgroundList, this);
-        }
+        Close_System_Dock();
+        Show_System_Dock();
+        Show_DOCK = true;
     }
 
     public void onBackPressed() {
         super.onBackPressed();
-
+        finishAffinity();
     }
 
     public void onPause() {
@@ -316,235 +306,237 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void Show_System_Dock() {
-        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-        layoutParams = new WindowManager.LayoutParams();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        if (!Settings.canDrawOverlays(this)) {
+            //Can Draw Overlays Permission
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
         } else {
-            layoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
-        }
-        layoutParams.format = PixelFormat.TRANSLUCENT;
-        layoutParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
-        layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        layoutParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
-        layoutParams.height = 180;
-        layoutParams.x = 0;
-        layoutParams.y = 0;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            layoutParams.preferMinimalPostProcessing = true;
-        }
-        LayoutInflater layoutInflater = LayoutInflater.from(this);
-        displayView = layoutInflater.inflate(R.layout.system_dock, null);
-        displayView.setOnTouchListener(null);
-
-        ImageView lock_ = displayView.findViewById(R.id.lock_);
-        ImageView Speed_box = displayView.findViewById(R.id.Speed_Box_);
-        ImageView ico = displayView.findViewById(R.id.ico);
-        ImageView resent_services = displayView.findViewById(R.id.resent_services);
-
-        LinearLayout headerBlur = displayView.findViewById(R.id.head_blur);
-        LinearLayout nearbyServices = displayView.findViewById(R.id.nearbyServices);
-
-        TextView Time_View = displayView.findViewById(R.id.time_view);
-
-        RecyclerView Floating_dock_app = displayView.findViewById(R.id.fd_a);
-
-        SetFilter(lock_, "#FF" + COLOR_BASE, 1);
-        SetFilter(Speed_box, "#FF" + COLOR_BASE, 1);
-        SetFilter(ico, "#FF" + COLOR_BASE, 0);
-        SetFilter(resent_services, "#FF" + COLOR_BASE, 1);
-
-
-        headerBlur.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 80));
-
-        final AlphaAnimation fadeIn = new AlphaAnimation(1.0f, 0.0f);
-        final AlphaAnimation fadeOut = new AlphaAnimation(0.0f, 1.0f);
-        fadeIn.setDuration(1000);
-        fadeIn.setFillAfter(true);
-        fadeOut.setDuration(1000);
-        fadeOut.setFillAfter(true);
-        fadeOut.setStartOffset(20);
-
-        headerBlur.setAnimation(fadeOut);
-        Speed_box.setVisibility(View.GONE);
-        Floating_dock_app.setVisibility(View.GONE);
-
-
-        T_ = new TimerTask() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        GetTime(Time_View);
-                        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                        WifiInfo info = wifiManager.getConnectionInfo();
-                        String ssid = info.getSSID();
-                        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-                        NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-
-                        if (ssid.contains("AndroidShare")) {
-                            SetBackData(60, "#FF0075FF", 0, "#FFF4D1", nearbyServices);
-                            DestroyConnection();
-                        } else {
-                            if (IsHotSpotOn) {
-                                SetBackData(60, "#FF24FF00", 0, "#FFF4D1", nearbyServices);
-                            } else {
-                                SetBackData(60, "#FFFF5B5B", 0, "#FFF4D1", nearbyServices);
-                            }
-                        }
-                    }
-                });
+            windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+            layoutParams = new WindowManager.LayoutParams();
+            layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            layoutParams.format = PixelFormat.TRANSLUCENT;
+            layoutParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
+            layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+            layoutParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
+            layoutParams.height = 180;
+            layoutParams.x = 0;
+            layoutParams.y = 0;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                layoutParams.preferMinimalPostProcessing = true;
             }
-        };
-        timer_.scheduleAtFixedRate(T_, 500, 500);
+            LayoutInflater layoutInflater = LayoutInflater.from(this);
+            displayView = layoutInflater.inflate(R.layout.system_dock, null);
+            displayView.setOnTouchListener(null);
+
+            ImageView lock_ = displayView.findViewById(R.id.lock_);
+            ImageView Speed_box = displayView.findViewById(R.id.Speed_Box_);
+            ImageView ico = displayView.findViewById(R.id.ico);
+            ImageView resent_services = displayView.findViewById(R.id.resent_services);
+
+            LinearLayout headerBlur = displayView.findViewById(R.id.head_blur);
+            LinearLayout nearbyServices = displayView.findViewById(R.id.nearbyServices);
+
+            TextView Time_View = displayView.findViewById(R.id.time_view);
+
+            RecyclerView Floating_dock_app = displayView.findViewById(R.id.fd_a);
+
+            SetFilter(lock_, "#FF" + COLOR_BASE, 1);
+            SetFilter(Speed_box, "#FF" + COLOR_BASE, 1);
+            SetFilter(ico, "#FF" + COLOR_BASE, 0);
+            SetFilter(resent_services, "#FF" + COLOR_BASE, 1);
 
 
-        //#DF060815
-        GetBackGroundServicesList(GetBackgroundList, this);
+            headerBlur.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 80));
 
-        Floating_dock_app.setAdapter(new FloatingDock_Apps(Generate_APPS_LIST));
-        Floating_dock_app.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+            final AlphaAnimation fadeIn = new AlphaAnimation(1.0f, 0.0f);
+            final AlphaAnimation fadeOut = new AlphaAnimation(0.0f, 1.0f);
+            fadeIn.setDuration(1000);
+            fadeIn.setFillAfter(true);
+            fadeOut.setDuration(1000);
+            fadeOut.setFillAfter(true);
+            fadeOut.setStartOffset(20);
 
-        // Green -->  #FF24FF00
-        // Red   -->  #FFFF5B5B
+            headerBlur.setAnimation(fadeOut);
+            Speed_box.setVisibility(View.GONE);
+            Floating_dock_app.setVisibility(View.GONE);
 
-        SetBackData(60, "#BF" + COLOR_DOMINANT, 1, "#FFF4D1", headerBlur);
 
-        ico.setOnClickListener(view -> {
-            if (v_floating_dock_shortcuts == View.VISIBLE) {
-                v_floating_dock_shortcuts = View.GONE;
-                Floating_dock_app.setVisibility(View.VISIBLE);
-            } else {
-                if (v_floating_dock_shortcuts == View.GONE) {
-                    v_floating_dock_shortcuts = View.VISIBLE;
-                    Floating_dock_app.setVisibility(View.GONE);
-                }
-            }
-        });
-
-        headerBlur.setOnTouchListener((view, p2) -> {
-            switch (p2.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    y1 = p2.getY();
-                    x1 = p2.getX();
-                    break;
-                case MotionEvent.ACTION_UP:
-                    y2 = p2.getY();
-                    x2 = p2.getX();
-
-                    if (((x1 - x2) < -250)) {
-                        //Right
-                        ANIM_FADEOUT(headerBlur);
-                        T_close_floating_dock = new TimerTask() {
-                            @Override
-                            public void run() {
-                                runOnUiThread(() -> Close_System_Dock());
-                            }
-                        };
-                        timer_close_floating_dock.schedule(T_close_floating_dock, 1000);
-                    }
-
-                    if (((x2 - x1) < -250)) {
-                        //left
-                        headerBlur.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, 80));
-                        lock_.setVisibility(View.VISIBLE);
-                        Speed_box.setVisibility(View.GONE);
-                        layoutParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
-                        layoutParams.height = 180;
-                    }
-                    break;
-            }
-            return true;
-        });
-
-        headerBlur.setOnLongClickListener(view -> {
-            Close_System_Dock();
-            return false;
-        });
-
-        resent_services.setOnClickListener(view -> {
-            if (count_F_D_M == 0) {
-                count_F_D_M++;
-                ShowUserPanel();
-            } else {
-                if (count_F_D_M == 1) {
-                    count_F_D_M--;
-                    ANIM_FADEOUT(displayView2.findViewById(R.id.floating_dock_bg));
-                    T_close_floating_dock2 = new TimerTask() {
-                        @Override
-                        public void run() {
-                            runOnUiThread(() -> Close_UserPanel());
-                        }
-                    };
-                    timer_close_floating_dock2.schedule(T_close_floating_dock2, 1000);
-                }
-            }
-
-        });
-
-        lock_.setOnClickListener(view -> {
-            headerBlur.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, 80));
-            lock_.setVisibility(View.GONE);
-            Speed_box.setVisibility(View.VISIBLE);
-            displayView.findViewById(R.id.resent_services).setVisibility(View.VISIBLE);
-            displayView.findViewById(R.id.ico).setVisibility(View.VISIBLE);
-            displayView.findViewById(R.id.time_view).setVisibility(View.VISIBLE);
-        });
-
-        Speed_box.setOnClickListener(view_ -> {
-            View view = getLayoutInflater().inflate(R.layout.dialog_layout, null);
-            CodeScanner mCodeScanner;
-            final ArrayList<String>[] GeneratedQrData = new ArrayList[]{new ArrayList<>()};
-
-            MaterialAlertDialogBuilder dlg = new MaterialAlertDialogBuilder(this);
-
-            dlg.setTitle("Select Device");
-            dlg.setView(view);
-            dlg.setMessage("You can select one or Multi-pal Devices");
-
-            final CodeScannerView usr = view.findViewById(R.id.scanner_vie);
-
-            mCodeScanner = new CodeScanner(this, usr);
-
-            mCodeScanner.setDecodeCallback(new DecodeCallback() {
+            T_ = new TimerTask() {
                 @Override
-                public void onDecoded(@NonNull final Result result) {
-                    GeneratedQrData[0] = new Gson().fromJson(result.getText(), new TypeToken<ArrayList<String>>() {
-                    }.getType());
+                public void run() {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            GetTime(Time_View);
+                            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                            WifiInfo info = wifiManager.getConnectionInfo();
+                            String ssid = info.getSSID();
+                            ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                            NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
+                            if (ssid.contains("AndroidShare")) {
+                                SetBackData(60, "#FF0075FF", 0, "#FFF4D1", nearbyServices);
+                                DestroyConnection();
+                            } else {
+                                if (IsHotSpotOn) {
+                                    SetBackData(60, "#FF24FF00", 0, "#FFF4D1", nearbyServices);
+                                } else {
+                                    SetBackData(60, "#FFFF5B5B", 0, "#FFF4D1", nearbyServices);
+                                }
+                            }
                         }
                     });
                 }
-            });
+            };
+            timer_.scheduleAtFixedRate(T_, 500, 500);
 
-            usr.setOnClickListener(view1 -> mCodeScanner.startPreview());
 
-            dlg.setPositiveButton("Connect", (dialog, which) -> {
+            //#DF060815
+            GetBackGroundServicesList(GetBackgroundList, this);
 
-            });
+            Floating_dock_app.setAdapter(new FloatingDock_Apps(Generate_APPS_LIST));
+            Floating_dock_app.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
-            dlg.setNegativeButton("Cancel", (dialog, which) -> dlg.create().cancel());
+            // Green -->  #FF24FF00
+            // Red   -->  #FFFF5B5B
 
-            dlg.create().show();
+            SetBackData(60, "#BF" + COLOR_DOMINANT, 1, "#FFF4D1", headerBlur);
 
-            dlg.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-
+            ico.setOnClickListener(view -> {
+                if (v_floating_dock_shortcuts == View.VISIBLE) {
+                    v_floating_dock_shortcuts = View.GONE;
+                    Floating_dock_app.setVisibility(View.VISIBLE);
+                } else {
+                    if (v_floating_dock_shortcuts == View.GONE) {
+                        v_floating_dock_shortcuts = View.VISIBLE;
+                        Floating_dock_app.setVisibility(View.GONE);
+                    }
                 }
             });
 
-        });
+            headerBlur.setOnTouchListener((view, p2) -> {
+                switch (p2.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        y1 = p2.getY();
+                        x1 = p2.getX();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        y2 = p2.getY();
+                        x2 = p2.getX();
 
-        nearbyServices.setOnClickListener(v -> {
+                        if (((x1 - x2) < -250)) {
+                            //Right
+                            ANIM_FADEOUT(headerBlur);
+                            T_close_floating_dock = new TimerTask() {
+                                @Override
+                                public void run() {
+                                    runOnUiThread(() -> Close_System_Dock());
+                                }
+                            };
+                            timer_close_floating_dock.schedule(T_close_floating_dock, 1000);
+                        }
 
-        });
+                        if (((x2 - x1) < -250)) {
+                            //left
+                            headerBlur.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, 80));
+                            lock_.setVisibility(View.VISIBLE);
+                            Speed_box.setVisibility(View.GONE);
+                            layoutParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
+                            layoutParams.height = 180;
+                        }
+                        break;
+                }
+                return true;
+            });
 
-        windowManager.addView(displayView, layoutParams);
+            headerBlur.setOnLongClickListener(view -> {
+                Close_System_Dock();
+                return false;
+            });
+
+            resent_services.setOnClickListener(view -> {
+                if (count_F_D_M == 0) {
+                    count_F_D_M++;
+                    ShowUserPanel();
+                } else {
+                    if (count_F_D_M == 1) {
+                        count_F_D_M--;
+                        ANIM_FADEOUT(displayView2.findViewById(R.id.floating_dock_bg));
+                        T_close_floating_dock2 = new TimerTask() {
+                            @Override
+                            public void run() {
+                                runOnUiThread(() -> Close_UserPanel());
+                            }
+                        };
+                        timer_close_floating_dock2.schedule(T_close_floating_dock2, 1000);
+                    }
+                }
+
+            });
+
+            lock_.setOnClickListener(view -> {
+                headerBlur.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, 80));
+                lock_.setVisibility(View.GONE);
+                Speed_box.setVisibility(View.VISIBLE);
+                displayView.findViewById(R.id.resent_services).setVisibility(View.VISIBLE);
+                displayView.findViewById(R.id.ico).setVisibility(View.VISIBLE);
+                displayView.findViewById(R.id.time_view).setVisibility(View.VISIBLE);
+            });
+
+            Speed_box.setOnClickListener(view_ -> {
+                View view = getLayoutInflater().inflate(R.layout.dialog_layout, null);
+                CodeScanner mCodeScanner;
+                final ArrayList<String>[] GeneratedQrData = new ArrayList[]{new ArrayList<>()};
+
+                MaterialAlertDialogBuilder dlg = new MaterialAlertDialogBuilder(this);
+
+                dlg.setTitle("Select Device");
+                dlg.setView(view);
+                dlg.setMessage("You can select one or Multi-pal Devices");
+
+                final CodeScannerView usr = view.findViewById(R.id.scanner_vie);
+
+                mCodeScanner = new CodeScanner(this, usr);
+
+                mCodeScanner.setDecodeCallback(new DecodeCallback() {
+                    @Override
+                    public void onDecoded(@NonNull final Result result) {
+                        GeneratedQrData[0] = new Gson().fromJson(result.getText(), new TypeToken<ArrayList<String>>() {
+                        }.getType());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                            }
+                        });
+                    }
+                });
+
+                usr.setOnClickListener(view1 -> mCodeScanner.startPreview());
+
+                dlg.setPositiveButton("Connect", (dialog, which) -> {
+
+                });
+
+                dlg.setNegativeButton("Cancel", (dialog, which) -> dlg.create().cancel());
+
+                dlg.create().show();
+
+                dlg.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+
+                    }
+                });
+
+            });
+
+            nearbyServices.setOnClickListener(v -> {
+
+            });
+
+            windowManager.addView(displayView, layoutParams);
+        }
     }
 
     public void SetFilter(ImageView imageView, String base_color, int Case) {
@@ -609,7 +601,7 @@ public class MainActivity extends AppCompatActivity {
         Task_list.setOnItemClickListener((adapterView, v, i, l) -> {
             Intent launchIntent = getPackageManager().getLaunchIntentForPackage(Objects.requireNonNull(Generate_APPS_LIST.get(i).get("pack")).toString());
 
-            startActivity(launchIntent);
+            ActivityTransition(img, "", launchIntent);
             Close_UserPanel();
         });
 
@@ -748,6 +740,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void ActivityTransition(final View _view, final String _transitionName, final Intent _intent) {
+        _view.setTransitionName(_transitionName);
+
+        ActivityOptions optionsCompat = makeSceneTransitionAnimation(this, _view, _transitionName);
+        startActivity(_intent, optionsCompat.toBundle());
+    }
+
     public void Close_UserPanel() {
         try {
             windowManager2.removeView(displayView2);
@@ -856,11 +855,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void GetTime(TextView txt) {
         Calendar calander = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            calander = Calendar.getInstance();
-            @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh : mm a");
-            txt.setText(simpleDateFormat.format(calander.getTime()));
-        }
+        calander = Calendar.getInstance();
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh : mm a");
+        txt.setText(simpleDateFormat.format(calander.getTime()));
     }
 
     public class Task_Adapter extends BaseAdapter {

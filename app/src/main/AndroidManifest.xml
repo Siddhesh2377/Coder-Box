@@ -64,40 +64,47 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+
+                <!-- Launcher Permissions -->
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+
             </intent-filter>
         </activity>
-        <!-- Main Activity 2 -->
-        <!-- File Receiver -->
-        <!-- File Sender -->
+
         <!-- Main Activity -->
+        <!--StartUp Activity -->
+
         <activity
             android:name=".MainActivity"
             android:configChanges="screenSize|keyboardHidden|smallestScreenSize|screenLayout"
             android:exported="true"
             android:hardwareAccelerated="true"
             android:resizeableActivity="true"
-            android:theme="@style/NoActionBar"
-            android:supportsPictureInPicture="true">
+            android:supportsPictureInPicture="true"
+            android:theme="@style/NoActionBar">
 
         </activity>
 
         <uses-library
             android:name="org.apache.http.legacy"
-            android:required="false" /> <!-- Floating Dock Tile Service -->
-<!--        <service-->
-<!--            android:name=".DarkServices.FloatingDockService"-->
-<!--            android:exported="true"-->
-<!--            android:icon="@drawable/app_icon"-->
-<!--            android:label="@string/float_dock"-->
-<!--            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.service.quicksettings.action.QS_TILE" />-->
-<!--            </intent-filter>-->
+            android:required="false" />
 
-<!--            <meta-data-->
-<!--                android:name="android.service.quick_settings.ACTIVE_TILE"-->
-<!--                android:value="true" />-->
-<!--        </service>-->
+        <!-- Floating Dock Tile Service -->
+        <service
+            android:name=".DarkServices.FloatingDockService"
+            android:exported="true"
+            android:icon="@drawable/app_icon"
+            android:label="@string/float_dock"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.service.quick_settings.ACTIVE_TILE"
+                android:value="true" />
+        </service>
     </application>
 
 </manifest>
