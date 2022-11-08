@@ -5,8 +5,6 @@ import static com.dark.coderbox.DarkServices.DarkRootServices.GetBackGroundServi
 import static com.dark.coderbox.DarkServices.DarkUtils.ShowMessage;
 import static com.dark.coderbox.DarkServices.EnvPathVariables.DEFAULT_WALLPAPER;
 import static com.dark.coderbox.DarkServices.EnvPathVariables.SYSTEM_DATA_FILE;
-import static com.dark.coderbox.DarkServices.NearbyDevices.DestroyConnection;
-import static com.dark.coderbox.DarkServices.NearbyDevices.IsHotSpotOn;
 import static com.dark.coderbox.DarkServices.ThemeMannager.ThemeModule.ANIM_FADEOUT;
 import static com.dark.coderbox.DarkServices.ThemeMannager.ThemeModule.ANIM_FADE_IN;
 import static com.dark.coderbox.DarkServices.ThemeMannager.ThemeModule.ColourAnim;
@@ -69,13 +67,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
+import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.CodeScannerView;
 import com.budiyev.android.codescanner.DecodeCallback;
+import com.dark.coderbox.DarkServices.Connections.WifiState;
+import com.dark.coderbox.DarkServices.Connections.WifiStateListener;
+import com.dark.coderbox.DarkServices.Connections.WifiStateReceiver;
 import com.dark.coderbox.DarkServices.DarkUtils;
 import com.dark.coderbox.libs.FileUtil;
 import com.dark.coderbox.libs.LanguageXR;
@@ -98,7 +99,7 @@ import eightbitlab.com.blurview.RenderScriptBlur;
 
 @RequiresApi(api = Build.VERSION_CODES.S)
 @SuppressLint("ClickableViewAccessibility")
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements WifiStateListener {
     public static String COLOR_ACCENT;
     public static String COLOR_BASE = "FFFFFF";
     public static String COLOR_DOMINANT = "2E2E2E";
@@ -116,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
     public final ArrayList<HashMap<String, Object>> Generate_APPS_LIST = new ArrayList<>();
     //Strings
     public String base_color = "#FFFFFFFF";
-
     //Booleans
     public boolean Show_DOCK = false;
     public boolean All_Permissions_OK = false;
@@ -144,7 +144,9 @@ public class MainActivity extends AppCompatActivity {
     public int count_F_D_M = 0;
     public int v_floating_dock_shortcuts = View.VISIBLE;
     public int H = 0;
+    WifiStateReceiver wifiStateReceiver;
     private LinearLayout bg_main;
+    private LinearLayout test_body;
     private LinearLayout controls_border;
     private ImageView img;
 
@@ -164,13 +166,14 @@ public class MainActivity extends AppCompatActivity {
 
         //Views
         img = findViewById(R.id.bg_Home_REF);
+        test_body = findViewById(R.id.test_body);
         bg_main = findViewById(R.id.bg_main);
         controls_border = findViewById(R.id.controle_border);
 
 
         //Logic
-        All_Permissions_OK = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
         SetupLogic();
+
         //        if (All_Permissions_OK) {
 //            //Setting Wallpaper
 ////            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -184,7 +187,6 @@ public class MainActivity extends AppCompatActivity {
 //            //Initializing Syste
 //
 //        }
-
 
         bg_main.setOnTouchListener((view, p2) -> {
 
@@ -238,14 +240,25 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-//        if (!isHomeApp())
-//            startActivity(new Intent(Settings.ACTION_HOME_SETTINGS));
+        GetColor();
 
+    }
+
+    public void GetColor() {
+        Bitmap icon = BitmapFactory.decodeFile(DEFAULT_WALLPAPER);
+        Palette p = Palette.from(icon).generate();
+        test_body.setBackgroundColor(p.getLightVibrantColor(getResources().getColor(android.R.color.black)));
     }
 
     public void onStart() {
         Close_System_Dock();
         Show_System_Dock();
+        if (wifiStateReceiver != null) {
+            return;
+        }
+        wifiStateReceiver = WifiStateReceiver.createAndRegister(this, this);
+        // Get current wifi state
+        wifiStateReceiver.onReceive(this, null);
         super.onStart();
     }
 
@@ -267,7 +280,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onDestroy() {
-
+        if (wifiStateReceiver != null) {
+            unregisterReceiver(wifiStateReceiver);
+            wifiStateReceiver = null;
+        }
         super.onDestroy();
     }
 
@@ -373,17 +389,6 @@ public class MainActivity extends AppCompatActivity {
                             String ssid = info.getSSID();
                             ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                             NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-
-                            if (ssid.contains("AndroidShare")) {
-                                SetBackData(60, "#FF0075FF", 0, "#FFF4D1", nearbyServices);
-                                DestroyConnection();
-                            } else {
-                                if (IsHotSpotOn) {
-                                    SetBackData(60, "#FF24FF00", 0, "#FFF4D1", nearbyServices);
-                                } else {
-                                    SetBackData(60, "#FFFF5B5B", 0, "#FFF4D1", nearbyServices);
-                                }
-                            }
                         }
                     });
                 }
@@ -537,6 +542,25 @@ public class MainActivity extends AppCompatActivity {
 
             windowManager.addView(displayView, layoutParams);
         }
+    }
+
+    public void SetState(int CASE) {
+        View v = displayView.findViewById(R.id.nearbyServices);
+
+        switch (CASE) {
+            case 1:
+                SetBackData(60, "#FF5B5B", 0, "#FFF4D1", v);
+                break;
+            case 2:
+                SetBackData(60, "#81D2FF", 0, "#FFF4D1", v);
+                break;
+            case 3:
+                SetBackData(60, "#00A3FF", 0, "#FFF4D1", v);
+                break;
+
+
+        }
+
     }
 
     public void SetFilter(ImageView imageView, String base_color, int Case) {
@@ -708,9 +732,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Wifi_btn.setOnClickListener(v -> {
-            Close_UserPanel();
-            Intent panelIntent = new Intent(Settings.Panel.ACTION_WIFI);
-            startActivityForResult(panelIntent, 1);
+//            Close_UserPanel();
+//            Intent panelIntent = new Intent(Settings.Panel.ACTION_WIFI);
+//            startActivityForResult(panelIntent, 1)
+            final WifiManager wifiMan = getSystemService(WifiManager.class);
+            wifiMan.setWifiEnabled(!wifiMan.isWifiEnabled());
         });
 
         Bluetooth_btn.setOnClickListener(v -> {
@@ -858,6 +884,23 @@ public class MainActivity extends AppCompatActivity {
         calander = Calendar.getInstance();
         @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh : mm a");
         txt.setText(simpleDateFormat.format(calander.getTime()));
+    }
+
+    @Override
+    public void onWifiStateChanged(WifiState state, String ssid) {
+
+        switch (state) {
+            case DISABLED:
+                SetState(1);
+                break;
+            case ENABLED:
+                SetState(2);
+                break;
+            case CONNECTED:
+                SetState(3);
+                break;
+        }
+
     }
 
     public class Task_Adapter extends BaseAdapter {

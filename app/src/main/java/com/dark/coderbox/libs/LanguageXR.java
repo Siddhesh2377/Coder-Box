@@ -18,7 +18,7 @@ public class LanguageXR {
 
     public static String READ_XR_DATA(String mod, String keys, String str) {
         String s = "";
-        if(FileUtil.isExistFile(str)){
+        if (FileUtil.isExistFile(str)) {
             Generated_Lines_List.clear();
             Generated_Lines_List = new Gson().fromJson(FileUtil.readFile(str), new TypeToken<ArrayList<String>>() {
             }.getType());
@@ -77,7 +77,7 @@ public class LanguageXR {
                     }
                 }
             }
-        }else {
+        } else {
             s = "";
         }
 

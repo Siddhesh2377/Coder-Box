@@ -125,7 +125,6 @@ public class SetUpActivity extends AppCompatActivity {
                     while ((count = input.read(data)) != -1) {
                         total += count;
                         // publishing the progress....
-
                         download_progress.setProgress(Integer.parseInt("" + (int) ((total * 100) / lenghtOfFile)));
                         // writing data to file
                         output.write(data, 0, count);
@@ -180,7 +179,7 @@ public class SetUpActivity extends AppCompatActivity {
         }
     }
 
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         if (!Settings.canDrawOverlays(SetUpActivity.this)) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
