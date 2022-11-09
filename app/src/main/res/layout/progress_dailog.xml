@@ -6,9 +6,10 @@
 
     <LinearLayout
         android:id="@+id/bg_custom_progress"
-        android:layout_width="match_parent"
+        android:layout_width="343dp"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
+        android:layout_gravity="center"
         android:orientation="vertical">
 
         <LinearLayout
@@ -32,7 +33,7 @@
             android:id="@+id/download_progress"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
+            android:layout_height="20dp"
             android:layout_margin="25dp"
             android:indeterminate="false"
             android:progress="0"
@@ -46,7 +47,7 @@
 
             <LinearLayout
                 android:layout_width="75dp"
-                android:layout_height="20dp"
+                android:layout_height="10dp"
                 android:background="@drawable/bottom_dock"
                 android:orientation="horizontal" />
         </LinearLayout>
