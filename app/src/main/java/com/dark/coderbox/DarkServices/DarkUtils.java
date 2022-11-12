@@ -21,7 +21,7 @@ import java.io.OutputStream;
 public class DarkUtils {
     public static void ShowMessage(String txt, Context context) {
         //Toast
-        Toast.makeText(context, txt, Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, txt, Toast.LENGTH_LONG).show();
     }
 
     public static void copyAssets(Context context) {

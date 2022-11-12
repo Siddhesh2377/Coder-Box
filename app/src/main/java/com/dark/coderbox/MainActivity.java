@@ -242,13 +242,16 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
 
     }
 
-    public void GetColor() {
+    public int GetColor(int CASE) {
         Bitmap icon = BitmapFactory.decodeFile(DEFAULT_WALLPAPER);
         Palette p = Palette.from(icon).generate();
-        test_body.setBackgroundColor(p.getLightVibrantColor(getResources().getColor(android.R.color.black)));
+        Palette.Swatch vibrantSwatch = p.getDarkMutedSwatch();
+        ShowMessage(String.valueOf(vibrantSwatch.getRgb()), this);
+        return p.getLightVibrantColor(getResources().getColor(android.R.color.black));
     }
 
     public void onStart() {
+        super.onStart();
         Close_System_Dock();
         Show_System_Dock();
         if (wifiStateReceiver != null) {
@@ -257,7 +260,6 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
         wifiStateReceiver = WifiStateReceiver.createAndRegister(this, this);
         // Get current wifi state
         wifiStateReceiver.onReceive(this, null);
-        super.onStart();
     }
 
     public void onResume() {
