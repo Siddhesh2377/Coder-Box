@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
 
         //Views
         img = findViewById(R.id.bg_Home_REF);
-       // test_body = findViewById(R.id.test_body);
+        // test_body = findViewById(R.id.test_body);
         bg_main = findViewById(R.id.bg_main);
         controls_border = findViewById(R.id.controle_border);
 
@@ -319,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
         }
     }
 
-    public void Show_Notification(){
+    public void Show_Notification() {
         LayoutInflater toast_lyt = getLayoutInflater();
         View toast_view = toast_lyt.inflate(R.layout.shownotifications, null);
     }

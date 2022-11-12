@@ -8,8 +8,8 @@
         android:id="@+id/bg_custom_progress"
         android:layout_width="343dp"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
         android:layout_gravity="center"
+        android:gravity="center_horizontal"
         android:orientation="vertical">
 
         <LinearLayout
