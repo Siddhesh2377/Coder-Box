@@ -50,9 +50,15 @@ import java.util.concurrent.Executors;
 @RequiresApi(api = Build.VERSION_CODES.S)
 public class SetUpActivity extends AppCompatActivity {
 
+    //Permission Components
+    public Manifest.permission PM_Holder;
+
+    //Ints
+    public int Android11 = Build.VERSION_CODES.R;
+    public int Android10 = Build.VERSION_CODES.Q;
+
     AlertDialog custom_progressbar;
     TextView txt;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,25 +68,18 @@ public class SetUpActivity extends AppCompatActivity {
         txt = findViewById(R.id.textView);
 
         //Logic
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
-            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED || checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1000);
+        if (Build.VERSION.SDK_INT >= Android11) {
+            if (!Environment.isExternalStorageManager() || !Settings.canDrawOverlays(this)) {
+                ManageStoragePermission();
+                AskCanDrawOverLayPermission();
             }
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                if (Environment.isExternalStorageManager()) {
-                    if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED || checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-                        requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1000);
-                    }
-                } else {
-                    Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-                    Uri uri = Uri.fromParts("package", getPackageName(), null);
-                    intent.setData(uri);
-                    startActivity(intent);
-                }
+        } 
+        if (Build.VERSION.SDK_INT <= Android10) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED || checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1000);
+                AskCanDrawOverLayPermission();
             }
         }
-
     }
 
     public void ActivityTransition(final View _view, final String _transitionName, final Intent _intent) {
@@ -172,45 +171,9 @@ public class SetUpActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 1000) {
-            if (!Settings.canDrawOverlays(SetUpActivity.this)) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-                startActivity(intent);
-            } else {
-                if (Settings.canDrawOverlays(SetUpActivity.this)) {
-                    if (isExistFile(DEFAULT_WALLPAPER)) {
-                        Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                        ActivityTransition(txt, "", i);
-                    } else {
-                        if (!isExistFile(DEFAULT_WALLPAPER)) {
-                            INIT_SYSTEM();
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     public void onResume() {
         super.onResume();
-        if (!Settings.canDrawOverlays(SetUpActivity.this)) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-            startActivity(intent);
-        } else {
-            if (Settings.canDrawOverlays(SetUpActivity.this)) {
-                if (isExistFile(DEFAULT_WALLPAPER)) {
-                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                    ActivityTransition(txt, "", i);
-                } else {
-                    if (!isExistFile(DEFAULT_WALLPAPER)) {
-                        INIT_SYSTEM();
-                    }
-                }
-            }
-        }
+        INIT_SYSTEM();
     }
 
     public boolean isConnected() {
@@ -227,86 +190,35 @@ public class SetUpActivity extends AppCompatActivity {
     }
 
     public void INIT_SYSTEM() {
-        FileUtil.makeDir(getExternalStorageDir().concat("/CBRoot/CBRData/SystemData"));
-        FileUtil.makeDir(getExternalStorageDir().concat("/CBRoot/SYSTEM/THEMES"));
-        FileUtil.writeFile(SYSTEM_DATA_FILE, "");
-        if (isConnected()) {
-            downloading();
+        if (isExistFile(DEFAULT_WALLPAPER)) {
+            Intent i = new Intent(getApplicationContext(), MainActivity.class);
+            ActivityTransition(txt, "", i);
         } else {
-            if (!isConnected()) {
-                ShowMessage("Connect To the INTERNET !", this);
+            if (!isExistFile(DEFAULT_WALLPAPER)) {
+                FileUtil.makeDir(getExternalStorageDir().concat("/CBRoot/CBRData/SystemData"));
+                FileUtil.makeDir(getExternalStorageDir().concat("/CBRoot/SYSTEM/THEMES"));
+                FileUtil.makeDir(getExternalStorageDir().concat("/CBRoot/SYSTEM/USERS"));
+                FileUtil.writeFile(SYSTEM_DATA_FILE, "");
+                if (isConnected()) {
+                    downloading();
+                } else {
+                    if (!isConnected()) {
+                        ShowMessage("Connect To the INTERNET !", this);
+                    }
+                }
             }
         }
     }
 
-//    public void askForPermissions() {
-//        //Permissions
-//
-//        //Read An Write Permission
-//        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED || checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-//            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.MANAGE_EXTERNAL_STORAGE}, 1000); // your request code
-//        } else {
-//            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED || checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED || checkSelfPermission(Manifest.permission.MANAGE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-//                //Manager Storage Permission
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-//                    if (!Environment.isExternalStorageManager()) {
-//                        Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-//                        startActivity(intent);
-//                    } else {
-//                        if (!Settings.System.canWrite(getApplicationContext())) {
-//                            Toast.makeText(this, "Please try again after giving access to Change system settings", Toast.LENGTH_SHORT).show();
-//                            Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.parse("package:" + getPackageName()));
-//                            startActivityForResult(intent, 200);
-//                        } else {
-//                            //Can Draw Overlays Permission
-//                            if (!Settings.canDrawOverlays(SetUpActivity.this)) {
-//                                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-//                                startActivity(intent);
-//                            } else {
-//                                //UseAccess Permission
-//                                try {
-//                                    PackageManager packageManager = getPackageManager();
-//                                    ApplicationInfo applicationInfo = packageManager.getApplicationInfo(getPackageName(), 0);
-//                                    AppOpsManager appOpsManager = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
-//                                    int mode = appOpsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, applicationInfo.uid, applicationInfo.packageName);
-//
-//                                    if ((mode == AppOpsManager.MODE_ALLOWED)) {
-//                                        if (ContextCompat.checkSelfPermission(SetUpActivity.this,
-//                                                Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_DENIED) {
-//                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-//                                                    ActivityCompat.requestPermissions(this, ANDROID_12_BLE_PERMISSIONS, 1007);
-//                                                else
-//                                                    ActivityCompat.requestPermissions(this, BLE_PERMISSIONS, 1007);
-//                                                return;
-//                                            }
-//                                        } else {
-//                                            if (Build.VERSION.SDK_INT >= 23) {
-//                                                if (ContextCompat.checkSelfPermission(SetUpActivity.this,
-//                                                        Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
-//
-//                                                    if (ActivityCompat.checkSelfPermission(this,
-//                                                            Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//                                                        //get access to location permission
-//                                                        int REQUEST_CODE_ASK_PERMISSIONS = 123;
-//                                                        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_ASK_PERMISSIONS);
-//                                                        return;
-//                                                    } else {
-//
-//                                                    }
-//                                                }
-//
-//                                            }
-//                                        }
-//                                    } else {
-//                                        if (!(mode == AppOpsManager.MODE_ALLOWED)) {
-//                                            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-//                                            startActivity(intent);
-//                                        }
-//                                    }
-//
-//                                }
-//
-//
+    public void ManageStoragePermission() {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivity(intent);
+    }
 
+    public void AskCanDrawOverLayPermission() {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+        startActivity(intent);
+    }
 }
