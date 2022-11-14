@@ -244,14 +244,6 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
 
     }
 
-    public int GetColor(int CASE) {
-        Bitmap icon = BitmapFactory.decodeFile(DEFAULT_WALLPAPER);
-        Palette p = Palette.from(icon).generate();
-        Palette.Swatch vibrantSwatch = p.getDarkMutedSwatch();
-        ShowMessage(String.valueOf(vibrantSwatch.getRgb()), this);
-        return p.getLightVibrantColor(getResources().getColor(android.R.color.black));
-    }
-
     public void onStart() {
         super.onStart();
         Close_System_Dock();
@@ -287,6 +279,14 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
             wifiStateReceiver = null;
         }
         super.onDestroy();
+    }
+
+    public int GetColor(int CASE) {
+        Bitmap icon = BitmapFactory.decodeFile(DEFAULT_WALLPAPER);
+        Palette p = Palette.from(icon).generate();
+        Palette.Swatch vibrantSwatch = p.getDarkMutedSwatch();
+        ShowMessage(String.valueOf(vibrantSwatch.getRgb()), this);
+        return p.getLightVibrantColor(getResources().getColor(android.R.color.black));
     }
 
     @SuppressLint("SuspiciousIndentation")
