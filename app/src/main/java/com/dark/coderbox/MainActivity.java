@@ -119,11 +119,13 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
     public String base_color = "#FFFFFFFF";
     //Booleans
     public boolean Show_DOCK = false;
-    public boolean All_Permissions_OK = false;
+    public boolean show_wifi_Notification = false;
     //Components
     public AlertDialog settings_dialog;
     public Timer timer_ = new Timer();
     public TimerTask T_;
+    public TimerTask systemNotification_timer;
+    public Timer system_notification_T = new Timer();
     public Timer timer_close_floating_dock = new Timer();
     public TimerTask T_close_floating_dock;
     public Timer timer_close_floating_dock2 = new Timer();
@@ -144,10 +146,10 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
     public int count_F_D_M = 0;
     public int v_floating_dock_shortcuts = View.VISIBLE;
     public int H = 0;
+    public LinearLayout controls_border;
     WifiStateReceiver wifiStateReceiver;
     private LinearLayout bg_main;
     private LinearLayout test_body;
-    private LinearLayout controls_border;
     private ImageView img;
 
     public boolean isHomeApp() {
@@ -223,8 +225,8 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
 
                         H = bg_main.getHeight() / 3;
                         ShowMessage(String.valueOf(H), this);
-                        ShowSideBar(controls_border);
-
+                        // ShowSideBar(controls_border);
+                        Show_Notification();
                     }
 
                     //LEFT
@@ -322,8 +324,32 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
     }
 
     public void Show_Notification() {
-        LayoutInflater toast_lyt = getLayoutInflater();
-        View toast_view = toast_lyt.inflate(R.layout.shownotifications, null);
+        View noti_view = getLayoutInflater().inflate(R.layout.shownotifications, null);
+        final PopupWindow system_notification = new PopupWindow(noti_view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        final LinearLayout bg_system_notification = noti_view.findViewById(R.id.bg_system_notification);
+        final LinearLayout indicator_system_notification = noti_view.findViewById(R.id.indicator_system_notification);
+        final TextView txt_system_notification = noti_view.findViewById(R.id.txt_system_notification);
+
+        SetBackData(16, "#FFFFFFFF", 0, "#FF222222", bg_system_notification);
+        SetBackData(25, "#FF81D2FF", 0, "#FF222222", indicator_system_notification);
+
+        txt_system_notification.setText("System Is Connected To Wifi");
+        system_notification.setAnimationStyle(android.R.style.Animation_Translucent);
+        system_notification.showAsDropDown(controls_border, 0, 0, Gravity.END);
+        system_notification.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        systemNotification_timer = new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        system_notification.dismiss();
+                    }
+                });
+            }
+        };
+        system_notification_T.schedule(systemNotification_timer, 2500);
     }
 
     public void Show_System_Dock() {
@@ -415,10 +441,12 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
             ico.setOnClickListener(view -> {
                 if (v_floating_dock_shortcuts == View.VISIBLE) {
                     v_floating_dock_shortcuts = View.GONE;
+                    resent_services.setVisibility(View.GONE);
                     Floating_dock_app.setVisibility(View.VISIBLE);
                 } else {
                     if (v_floating_dock_shortcuts == View.GONE) {
                         v_floating_dock_shortcuts = View.VISIBLE;
+                        resent_services.setVisibility(View.VISIBLE);
                         Floating_dock_app.setVisibility(View.GONE);
                     }
                 }
@@ -448,20 +476,11 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
 
                         if (((x2 - x1) < -250)) {
                             //left
-                            headerBlur.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, 80));
-                            lock_.setVisibility(View.VISIBLE);
-                            Speed_box.setVisibility(View.GONE);
-                            layoutParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
-                            layoutParams.height = 180;
+                            Show_Notification();
                         }
                         break;
                 }
                 return true;
-            });
-
-            headerBlur.setOnLongClickListener(view -> {
-                Close_System_Dock();
-                return false;
             });
 
             resent_services.setOnClickListener(view -> {
@@ -481,19 +500,20 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
                         timer_close_floating_dock2.schedule(T_close_floating_dock2, 1000);
                     }
                 }
-
             });
 
             lock_.setOnClickListener(view -> {
                 headerBlur.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, 80));
                 lock_.setVisibility(View.GONE);
                 Speed_box.setVisibility(View.VISIBLE);
-                displayView.findViewById(R.id.resent_services).setVisibility(View.VISIBLE);
+                resent_services.setVisibility(resent_services.getVisibility());
                 displayView.findViewById(R.id.ico).setVisibility(View.VISIBLE);
                 displayView.findViewById(R.id.time_view).setVisibility(View.VISIBLE);
             });
 
             Speed_box.setOnClickListener(view_ -> {
+                resent_services.setVisibility(resent_services.getVisibility());
+
                 View view = getLayoutInflater().inflate(R.layout.dialog_layout, null);
                 CodeScanner mCodeScanner;
                 final ArrayList<String>[] GeneratedQrData = new ArrayList[]{new ArrayList<>()};
@@ -542,7 +562,7 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
             });
 
             nearbyServices.setOnClickListener(v -> {
-
+                Show_Notification();
             });
 
             windowManager.addView(displayView, layoutParams);
@@ -554,12 +574,15 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
 
         switch (CASE) {
             case 1:
+                //Off
                 SetBackData(60, "#FF5B5B", 0, "#FFF4D1", v);
                 break;
             case 2:
+                //On
                 SetBackData(60, "#81D2FF", 0, "#FFF4D1", v);
                 break;
             case 3:
+                //Connected
                 SetBackData(60, "#00A3FF", 0, "#FFF4D1", v);
                 break;
 
