@@ -58,4 +58,5 @@ dependencies {
     implementation 'io.github.karuppiah7890:fileshare:0.1.0'
     implementation 'com.caverock:androidsvg:1.2.1'
     implementation 'com.github.dercilima:zipfiles:0.0.1'
+    implementation 'com.github.mmin18:realtimeblurview:1.2.1'
 }

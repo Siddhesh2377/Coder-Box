@@ -22,11 +22,19 @@
             android:tintMode="add"
             app:tint="#000000" />
 
+        <com.github.mmin18.widget.RealtimeBlurView
+            android:id="@+id/main_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:realtimeBlurRadius="20dp"
+            app:realtimeDownsampleFactor="0.5"
+            app:realtimeOverlayColor="#41FFFFFF" />
 
         <LinearLayout
             android:id="@+id/bg_main"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:gravity="center_horizontal"
             android:orientation="vertical">
 
             <LinearLayout
@@ -34,6 +42,28 @@
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:orientation="horizontal" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
+                android:checkable="true"
+                android:fontFamily="@font/tommarow"
+                android:includeFontPadding="false"
+                android:text="Dark Mod"
+                android:textAlignment="center"
+                android:textAllCaps="false"
+                android:textColor="#313131"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:checkedIconEnabled="false"
+                app:chipBackgroundColor="@color/material_dynamic_tertiary80"
+                app:chipEndPadding="8dp"
+                app:chipIcon="@drawable/app_icon"
+                app:chipIconVisible="true"
+                app:chipStartPadding="8dp"
+                app:closeIconVisible="false" />
 
             <!--            <com.dark.coderbox.Views.WorkSpaceBack-->
             <!--                android:id="@+id/Home_base"-->

@@ -20,9 +20,9 @@
             android:orientation="horizontal">
 
             <LinearLayout
+                android:id="@+id/left_user_panel"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:background="@drawable/flotingdock_max_left"
                 android:gravity="center_horizontal"
                 android:orientation="vertical">
 
@@ -127,6 +127,7 @@
                         android:orientation="horizontal">
 
                         <ImageView
+                            android:id="@+id/clear_bin"
                             android:layout_width="15dp"
                             android:layout_height="15dp"
                             app:srcCompat="@drawable/clean" />
@@ -141,9 +142,9 @@
                 android:orientation="vertical">
 
                 <LinearLayout
+                    android:id="@+id/top_user_panel"
                     android:layout_width="match_parent"
                     android:layout_height="30dp"
-                    android:background="@drawable/flotingdock_max_top"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -567,10 +568,10 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/bottom_user_panel"
             android:layout_width="match_parent"
             android:layout_height="15dp"
             android:layout_gravity="bottom"
-            android:background="@drawable/bottom_controller_bg"
             android:gravity="center"
             android:orientation="vertical">
 

@@ -5,6 +5,7 @@ import static com.dark.coderbox.DarkServices.DarkUtils.ShowMessage;
 import static com.dark.coderbox.DarkServices.DarkUtils.unzip;
 import static com.dark.coderbox.DarkServices.EnvPathVariables.DEFAULT_WALLPAPER;
 import static com.dark.coderbox.DarkServices.EnvPathVariables.SYSTEM_DATA_FILE;
+import static com.dark.coderbox.DarkServices.EnvPathVariables.SYSTEM_DATA_FOLDER;
 import static com.dark.coderbox.DarkServices.EnvPathVariables.SYSTEM_FOLDER;
 import static com.dark.coderbox.DarkServices.ThemeMannager.ThemeModule.SetBackData;
 import static com.dark.coderbox.libs.FileUtil.getExternalStorageDir;
@@ -38,21 +39,24 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.dark.coderbox.libs.FileUtil;
+import com.google.gson.Gson;
 
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @RequiresApi(api = Build.VERSION_CODES.S)
 public class SetUpActivity extends AppCompatActivity {
 
+    //ArrayList
+    public static ArrayList<String> systemInfo = new ArrayList<>();
     //Permission Components
     public Manifest.permission PM_Holder;
-
     //Ints
     public int Android11 = Build.VERSION_CODES.R;
     public int Android10 = Build.VERSION_CODES.Q;
@@ -195,10 +199,16 @@ public class SetUpActivity extends AppCompatActivity {
             ActivityTransition(txt, "", i);
         } else {
             if (!isExistFile(DEFAULT_WALLPAPER)) {
+                systemInfo.clear();
                 FileUtil.makeDir(getExternalStorageDir().concat("/CBRoot/CBRData/SystemData"));
                 FileUtil.makeDir(getExternalStorageDir().concat("/CBRoot/SYSTEM/THEMES"));
                 FileUtil.makeDir(getExternalStorageDir().concat("/CBRoot/SYSTEM/USERS"));
+
+                systemInfo.add("DATA.OPEN : Current.Theme C : Lite : Data.Close");
+
                 FileUtil.writeFile(SYSTEM_DATA_FILE, "");
+                FileUtil.writeFile(SYSTEM_DATA_FOLDER.concat("/").concat("system.xr"), new Gson().toJson(systemInfo));
+
                 if (isConnected()) {
                     downloading();
                 } else {

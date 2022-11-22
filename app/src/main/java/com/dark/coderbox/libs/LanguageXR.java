@@ -44,8 +44,8 @@ public class LanguageXR {
                         }
                     }
 
-                    s = s.substring(s.indexOf("C: ") + 3);
-                    s = s.substring(0, s.indexOf(" DATA.CLOSE"));
+                    s = s.substring(s.indexOf("C : ") + 3);
+                    s = s.substring(0, s.indexOf(" : Data.Close"));
                 } else {
                     if (mod.equals("MK.TH432876.XR")) {
                         //Mod --> THEMES_XR
@@ -72,8 +72,8 @@ public class LanguageXR {
                                 }
                             }
                         }
-                        s = s.substring(s.indexOf("C: ") + 1);
-                        s = s.substring(0, s.indexOf(" DATA.CLOSE"));
+                        s = s.substring(s.indexOf("C : ") + 1);
+                        s = s.substring(0, s.indexOf(" : DATA.CLOSE"));
                     }
                 }
             }

@@ -76,4 +76,14 @@ public class Keys {
 
     }
 
+    public static class SystemToast {
+
+        public static int SysError = 1;
+
+        public static int SysOk = 2;
+
+        public static int SysMessage = 3;
+
+    }
+
 }

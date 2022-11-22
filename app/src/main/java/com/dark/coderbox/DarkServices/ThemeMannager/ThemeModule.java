@@ -4,11 +4,15 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.vectordrawable.graphics.drawable.ArgbEvaluator;
+
+import com.dark.coderbox.MainActivity;
 
 public class ThemeModule extends AppCompatActivity {
 
@@ -57,20 +61,25 @@ public class ThemeModule extends AppCompatActivity {
     }
 
     public static void ColourAnim(String c1, String c2, View v) {
-        final String[] data = {""};
         @SuppressLint("RestrictedApi")
         ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), Color.parseColor(c1), Color.parseColor(c2));
         colorAnimation.setDuration(1500);
         colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @RequiresApi(api = Build.VERSION_CODES.S)
             @Override
             public void onAnimationUpdate(ValueAnimator animator) {
                 GradientDrawable data = new GradientDrawable();
                 data.setCornerRadius(8);
-                data.setColor(Color.WHITE);
-                data.setStroke(5, (int) animator.getAnimatedValue());
+                if (!MainActivity.IsDarkSystem()) {
+                    data.setColor(Color.WHITE);
+                } else {
+                    if (MainActivity.IsDarkSystem()) {
+                        data.setColor(Color.parseColor("#212121"));
+                    }
+                }
+                data.setStroke(3, (int) animator.getAnimatedValue());
                 v.setBackground(data);
             }
-
         });
 
         colorAnimation.start();

@@ -11,7 +11,11 @@ import static com.dark.coderbox.DarkServices.ThemeMannager.ThemeModule.ColourAni
 import static com.dark.coderbox.DarkServices.ThemeMannager.ThemeModule.SetBackData;
 import static com.dark.coderbox.libs.FileUtil.getExternalStorageDir;
 import static com.dark.coderbox.libs.Keys.MODS.SYSTEM_XR;
-import static com.dark.coderbox.libs.Keys.XRLanguages.GET_VOLUME;
+import static com.dark.coderbox.libs.Keys.SystemToast.SysError;
+import static com.dark.coderbox.libs.Keys.SystemToast.SysMessage;
+import static com.dark.coderbox.libs.Keys.SystemToast.SysOk;
+import static com.dark.coderbox.libs.Keys.XRLanguages.ThemeProvider;
+import static com.dark.coderbox.libs.LanguageXR.READ_XR_DATA;
 import static com.dark.coderbox.libs.LanguageXR.WriteSystemInfo;
 
 import android.annotation.SuppressLint;
@@ -24,6 +28,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -32,13 +37,12 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.icu.text.SimpleDateFormat;
 import android.icu.util.Calendar;
-import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.BatteryManager;
@@ -55,13 +59,13 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.BaseAdapter;
+import android.widget.CompoundButton;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -74,12 +78,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.CodeScannerView;
 import com.budiyev.android.codescanner.DecodeCallback;
-import com.dark.coderbox.DarkServices.Connections.WifiState;
-import com.dark.coderbox.DarkServices.Connections.WifiStateListener;
 import com.dark.coderbox.DarkServices.Connections.WifiStateReceiver;
-import com.dark.coderbox.DarkServices.DarkUtils;
 import com.dark.coderbox.libs.FileUtil;
-import com.dark.coderbox.libs.LanguageXR;
+import com.dark.coderbox.libs.Keys;
+import com.github.mmin18.widget.RealtimeBlurView;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.color.DynamicColors;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -99,7 +103,8 @@ import eightbitlab.com.blurview.RenderScriptBlur;
 
 @RequiresApi(api = Build.VERSION_CODES.S)
 @SuppressLint("ClickableViewAccessibility")
-public class MainActivity extends AppCompatActivity implements WifiStateListener {
+public class MainActivity extends AppCompatActivity {
+
     public static String COLOR_ACCENT;
     public static String COLOR_BASE = "FFFFFF";
     public static String COLOR_DOMINANT = "2E2E2E";
@@ -116,10 +121,10 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
     public final ArrayList<String> Generate_APPS_Name_LIST = new ArrayList<>();
     public final ArrayList<HashMap<String, Object>> Generate_APPS_LIST = new ArrayList<>();
     //Strings
-    public String base_color = "#FFFFFFFF";
+    public String base_color = "#FF00A3FF";
     //Booleans
     public boolean Show_DOCK = false;
-    public boolean show_wifi_Notification = false;
+    public boolean Show_Usr = false;
     //Components
     public AlertDialog settings_dialog;
     public Timer timer_ = new Timer();
@@ -147,10 +152,32 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
     public int v_floating_dock_shortcuts = View.VISIBLE;
     public int H = 0;
     public LinearLayout controls_border;
+    public String CurrentTheme = READ_XR_DATA(SYSTEM_XR, Keys.XRLanguages.ThemeProvider, SYSTEM_DATA_FILE);
     WifiStateReceiver wifiStateReceiver;
     private LinearLayout bg_main;
     private LinearLayout test_body;
+    private RealtimeBlurView main_background;
     private ImageView img;
+    private Chip chip;
+
+    public static boolean IsDarkSystem() {
+        boolean b = false;
+        if (READ_XR_DATA(SYSTEM_XR, Keys.XRLanguages.ThemeProvider, SYSTEM_DATA_FILE).contains("Lite")) {
+            b = false;
+        } else {
+            if (READ_XR_DATA(SYSTEM_XR, Keys.XRLanguages.ThemeProvider, SYSTEM_DATA_FILE).contains("Dark")) {
+                b = true;
+            }
+        }
+        return b;
+    }
+
+    public void Corners(int TL, int TR, int BL, int BR, String color_data, View view) {
+        GradientDrawable data = new GradientDrawable();
+        data.setCornerRadii(new float[]{TL, TL, TR, TR, BL, BL, BR, BR});
+        data.setColor(Color.parseColor(color_data));
+        view.setBackground(data);
+    }
 
     public boolean isHomeApp() {
         final Intent intent = new Intent(Intent.ACTION_MAIN);
@@ -160,21 +187,22 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
                 .equals(res.activityInfo.packageName);
     }
 
-    @SuppressLint({"ClickableViewAccessibility", "MissingInflatedId"})
+    @SuppressLint({"ClickableViewAccessibility", "MissingInflatedId", "SuspiciousIndentation", "ResourceAsColor"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         //Views
+        chip = findViewById(R.id.chip);
         img = findViewById(R.id.bg_Home_REF);
-        // test_body = findViewById(R.id.test_body);
         bg_main = findViewById(R.id.bg_main);
         controls_border = findViewById(R.id.controle_border);
-
+        main_background = findViewById(R.id.main_background);
 
         //Logic
         SetupLogic();
+        DynamicColors.applyToActivitiesIfAvailable(getApplication());
 
         //        if (All_Permissions_OK) {
 //            //Setting Wallpaper
@@ -212,12 +240,7 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
 
                     //UP
                     if (((y2 - y1) < -250)) {
-
-                        if (!Show_DOCK) {
-                            Show_System_Dock();
-                            Show_DOCK = true;
-                        }
-
+                        Close_UserPanel();
                     }
 
                     //RIGHT
@@ -226,14 +249,12 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
                         H = bg_main.getHeight() / 3;
                         ShowMessage(String.valueOf(H), this);
                         // ShowSideBar(controls_border);
-                        Show_Notification();
+                        ShowSettingDialog();
                     }
 
                     //LEFT
                     if (((x2 - x1) < -250)) {
-                        AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
-                        WriteSystemInfo(SYSTEM_DATA_FILE, SYSTEM_XR, GET_VOLUME, "DATA.OPEN : Current.Volume X: " + am.getStreamVolume(AudioManager.STREAM_MUSIC) + " DATA.CLOSE", this);
-                        Toast.makeText(MainActivity.this, LanguageXR.READ_XR_DATA(SYSTEM_XR, GET_VOLUME, SYSTEM_DATA_FILE), Toast.LENGTH_SHORT).show();
+                        Show_Notification(CurrentTheme, SysOk);
                     }
 
                     break;
@@ -242,18 +263,61 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
             return true;
         });
 
+        if (!IsDarkSystem()) {
+            chip.setChipBackgroundColor(ColorStateList.valueOf(getResources().getColor(com.google.android.material.R.color.material_dynamic_secondary50)));
+            chip.setTextColor(Color.parseColor("#2196F3"));
+            chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#2196F3")));
+
+        } else {
+            if (IsDarkSystem()) {
+                chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#2196F3")));
+                chip.setTextColor(Color.parseColor("#FFFFFF"));
+                chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#FFFFFF")));
+
+            }
+        }
+
+        chip.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#2196F3")));
+                    chip.setTextColor(Color.parseColor("#FFFFFF"));
+                    chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#FFFFFF")));
+                    WriteSystemInfo(SYSTEM_DATA_FILE, SYSTEM_XR, ThemeProvider, "DATA.OPEN : Current.Theme C : Dark : Data.Close", MainActivity.this);
+                    Show_Notification("Theme Set To Dark", SysOk);
+                    Close_System_Dock();
+                    Show_System_Dock();
+                    Show_DOCK = true;
+                    if (Show_Usr) {
+                        Close_UserPanel();
+                        ShowUserPanel();
+                    }
+                } else {
+                    if (!isChecked) {
+                        chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#FFFFFF")));
+                        chip.setTextColor(Color.parseColor("#2196F3"));
+                        chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#2196F3")));
+                        WriteSystemInfo(SYSTEM_DATA_FILE, SYSTEM_XR, ThemeProvider, "DATA.OPEN : Current.Theme C : Lite : Data.Close", MainActivity.this);
+                        Show_Notification("Theme Set To Lite", SysOk);
+                        Close_System_Dock();
+                        Show_System_Dock();
+                        Show_DOCK = true;
+                        if (Show_Usr) {
+                            Close_UserPanel();
+                            ShowUserPanel();
+                        }
+                    }
+                }
+            }
+        });
+
     }
 
     public void onStart() {
         super.onStart();
         Close_System_Dock();
         Show_System_Dock();
-        if (wifiStateReceiver != null) {
-            return;
-        }
-        wifiStateReceiver = WifiStateReceiver.createAndRegister(this, this);
-        // Get current wifi state
-        wifiStateReceiver.onReceive(this, null);
     }
 
     public void onResume() {
@@ -289,7 +353,6 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
         return p.getLightVibrantColor(getResources().getColor(android.R.color.black));
     }
 
-    @SuppressLint("SuspiciousIndentation")
     public void SetupLogic() {
         FullScreen_call();
         Bitmap myBitmap = BitmapFactory.decodeFile(DEFAULT_WALLPAPER);
@@ -323,17 +386,40 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
         }
     }
 
-    public void Show_Notification() {
+    public void Show_Notification(String message, int type) {
         View noti_view = getLayoutInflater().inflate(R.layout.shownotifications, null);
         final PopupWindow system_notification = new PopupWindow(noti_view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         final LinearLayout bg_system_notification = noti_view.findViewById(R.id.bg_system_notification);
         final LinearLayout indicator_system_notification = noti_view.findViewById(R.id.indicator_system_notification);
         final TextView txt_system_notification = noti_view.findViewById(R.id.txt_system_notification);
 
-        SetBackData(16, "#FFFFFFFF", 0, "#FF222222", bg_system_notification);
-        SetBackData(25, "#FF81D2FF", 0, "#FF222222", indicator_system_notification);
+        if (READ_XR_DATA(SYSTEM_XR, Keys.XRLanguages.ThemeProvider, SYSTEM_DATA_FILE).contains("Lite")) {
+            SetBackData(16, "#FFFFFF", 2, "#2C2C2C", bg_system_notification);
+            txt_system_notification.setTextColor(Color.parseColor("#4C4C4C"));
+        } else {
+            if (READ_XR_DATA(SYSTEM_XR, Keys.XRLanguages.ThemeProvider, SYSTEM_DATA_FILE).contains("Dark")) {
+                SetBackData(16, "#2C2C2C", 2, "#F0F0F0", bg_system_notification);
+                txt_system_notification.setTextColor(Color.parseColor("#FFFFFF"));
+            }
+        }
 
-        txt_system_notification.setText("System Is Connected To Wifi");
+
+        switch (type) {
+            case 1:
+                //Error
+                SetBackData(10, "#FF5B5B", 0, "#FF222222", indicator_system_notification);
+                break;
+            case 2:
+                //Ok
+                SetBackData(10, "#81D2FF", 0, "#FF222222", indicator_system_notification);
+                break;
+            case 3:
+                //Message
+                SetBackData(10, "#8B81FF", 0, "#FF222222", indicator_system_notification);
+                break;
+        }
+
+        txt_system_notification.setText(message);
         system_notification.setAnimationStyle(android.R.style.Animation_Translucent);
         system_notification.showAsDropDown(controls_border, 0, 0, Gravity.END);
         system_notification.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -386,12 +472,21 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
             TextView Time_View = displayView.findViewById(R.id.time_view);
 
             RecyclerView Floating_dock_app = displayView.findViewById(R.id.fd_a);
-
+            if (IsDarkSystem()) {
+                COLOR_BASE = "FFFFFF";
+                COLOR_DOMINANT = "2E2E2E";
+            } else {
+                if (!IsDarkSystem()) {
+                    COLOR_BASE = "555555";
+                    COLOR_DOMINANT = "FFFFFF";
+                }
+            }
             SetFilter(lock_, "#FF" + COLOR_BASE, 1);
             SetFilter(Speed_box, "#FF" + COLOR_BASE, 1);
-            SetFilter(ico, "#FF" + COLOR_BASE, 0);
+            //SetFilter(ico, "#FF" + COLOR_BASE, 0);
             SetFilter(resent_services, "#FF" + COLOR_BASE, 1);
-
+            SetBackData(60, "#BF" + COLOR_DOMINANT, 1, "#FF" + COLOR_BASE, headerBlur);
+            Time_View.setTextColor(Color.parseColor("#FF" + COLOR_BASE));
 
             headerBlur.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 80));
 
@@ -406,7 +501,8 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
             headerBlur.setAnimation(fadeOut);
             Speed_box.setVisibility(View.GONE);
             Floating_dock_app.setVisibility(View.GONE);
-
+            final WifiManager wifiMan = getSystemService(WifiManager.class);
+            final boolean[] isEnabled = {wifiMan.isWifiEnabled()};
 
             T_ = new TimerTask() {
                 @Override
@@ -415,17 +511,25 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
                         @Override
                         public void run() {
                             GetTime(Time_View);
-                            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                            WifiInfo info = wifiManager.getConnectionInfo();
-                            String ssid = info.getSSID();
+                            isEnabled[0] = wifiMan.isWifiEnabled();
                             ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                             NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                            if (isEnabled[0]) {
+                                if (mWifi.isConnected()) {
+                                    SetState(3);
+                                } else {
+                                    if (isEnabled[0]) {
+                                        SetState(2);
+                                    }
+                                }
+                            } else {
+                                SetState(1);
+                            }
                         }
                     });
                 }
             };
             timer_.scheduleAtFixedRate(T_, 500, 500);
-
 
             //#DF060815
             GetBackGroundServicesList(GetBackgroundList, this);
@@ -436,7 +540,6 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
             // Green -->  #FF24FF00
             // Red   -->  #FFFF5B5B
 
-            SetBackData(60, "#BF" + COLOR_DOMINANT, 1, "#FFF4D1", headerBlur);
 
             ico.setOnClickListener(view -> {
                 if (v_floating_dock_shortcuts == View.VISIBLE) {
@@ -476,7 +579,9 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
 
                         if (((x2 - x1) < -250)) {
                             //left
-                            Show_Notification();
+                            Close_UserPanel();
+                            ShowUserPanel();
+                            Show_Notification("Showing User Panel", SysOk);
                         }
                         break;
                 }
@@ -484,22 +589,9 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
             });
 
             resent_services.setOnClickListener(view -> {
-                if (count_F_D_M == 0) {
-                    count_F_D_M++;
-                    ShowUserPanel();
-                } else {
-                    if (count_F_D_M == 1) {
-                        count_F_D_M--;
-                        ANIM_FADEOUT(displayView2.findViewById(R.id.floating_dock_bg));
-                        T_close_floating_dock2 = new TimerTask() {
-                            @Override
-                            public void run() {
-                                runOnUiThread(() -> Close_UserPanel());
-                            }
-                        };
-                        timer_close_floating_dock2.schedule(T_close_floating_dock2, 1000);
-                    }
-                }
+                Close_UserPanel();
+                ShowUserPanel();
+                Show_Notification("Showing User Panel", SysOk);
             });
 
             lock_.setOnClickListener(view -> {
@@ -562,7 +654,20 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
             });
 
             nearbyServices.setOnClickListener(v -> {
-                Show_Notification();
+                ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                if (isEnabled[0]) {
+                    if (mWifi.isConnected()) {
+                        SetState(3);
+                        Show_Notification("Wifi Is Connected ! :)", SysMessage);
+                    } else {
+                        if (isEnabled[0]) {
+                            Show_Notification("Wifi Is On ! :)", SysOk);
+                        }
+                    }
+                } else {
+                    Show_Notification("Wifi Is Off ! :(", SysError);
+                }
             });
 
             windowManager.addView(displayView, layoutParams);
@@ -583,10 +688,8 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
                 break;
             case 3:
                 //Connected
-                SetBackData(60, "#00A3FF", 0, "#FFF4D1", v);
+                SetBackData(60, "#8B81FF", 0, "#FFF4D1", v);
                 break;
-
-
         }
 
     }
@@ -611,10 +714,10 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
             layoutParams2.type = WindowManager.LayoutParams.TYPE_PHONE;
         }
         layoutParams2.format = PixelFormat.RGBA_8888;
-        layoutParams2.gravity = Gravity.TOP;
+        layoutParams2.gravity = Gravity.CENTER;
         layoutParams2.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         layoutParams2.width = LinearLayout.LayoutParams.WRAP_CONTENT;
-        layoutParams2.height = LinearLayout.LayoutParams.MATCH_PARENT;
+        layoutParams2.height = LinearLayout.LayoutParams.WRAP_CONTENT;
         layoutParams2.x = 0;
         layoutParams2.y = 0;
 
@@ -630,6 +733,9 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
         LinearLayout bg_cc_base = displayView2.findViewById(R.id.bg_cc_base);
         LinearLayout Wifi_btn = displayView2.findViewById(R.id.wifi_btn);
         LinearLayout Bluetooth_btn = displayView2.findViewById(R.id.bluetooth_btn);
+        LinearLayout left_user_panel = displayView2.findViewById(R.id.left_user_panel);
+        LinearLayout top_user_panel = displayView2.findViewById(R.id.top_user_panel);
+        LinearLayout bottom_user_panel = displayView2.findViewById(R.id.bottom_user_panel);
         LinearLayout Bottom_bar = displayView2.findViewById(R.id.bottom_bar);
 
         ImageView resents_icon = displayView2.findViewById(R.id.resents_icon);
@@ -638,6 +744,7 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
         ImageView shortcut_ic = displayView2.findViewById(R.id.shaortcut_ic);
         ImageView cc_ic = displayView2.findViewById(R.id.Cc_ic);
         ImageView cell_data = displayView2.findViewById(R.id.cell_data_btn);
+        ImageView clear_bin = displayView2.findViewById(R.id.clear_bin);
 
         TextView window_title = displayView2.findViewById(R.id.window_title);
         TextView battery_idi_txt = displayView2.findViewById(R.id.battery_idi_txt);
@@ -649,33 +756,66 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
         bg_cc_base.setVisibility(View.GONE);
         Task_list.setVisibility(View.VISIBLE);
 
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (IsDarkSystem()) {
+                    SetBackData(8, "#212121", 3, "#FF00A3FF", btn_box);
+                    SetBackData(18, "#FF8B81FF", 0, "#FF00A3FF", clean_back_bg);
+                    SetBackData(14, "#A22F2F2F", 2, "#FFFFFFFF", floating_dock_bg);
+                    Corners(0, 10, 0, 10, "#282828", top_user_panel);
+                    Corners(10, 0, 10, 0, "#282828", left_user_panel);
+                    Corners(0, 0, 10, 10, "#282828", bottom_user_panel);
+                    SetFilter(resents_icon, "#FFFFFF", 1);
+                    window_title.setTextColor(Color.parseColor("#FFFFFF"));
+                    main_background.setBlurRadius(10);
+                    main_background.setOverlayColor(Color.parseColor("#72202020"));
+                } else {
+                    if (!IsDarkSystem()) {
+                        SetBackData(8, "#FFFFFF", 3, "#FF00A3FF", btn_box);
+                        SetBackData(18, "#FF8B81FF", 0, "#FF00A3FF", clean_back_bg);
+                        SetBackData(14, "#A2FFFFFF", 2, "#FFFFFFFF", floating_dock_bg);
+                        Corners(0, 10, 0, 10, "#FFFFFF", top_user_panel);
+                        Corners(10, 0, 10, 0, "#FFFFFF", left_user_panel);
+                        Corners(0, 0, 10, 10, "#FFFFFF", bottom_user_panel);
+                        window_title.setTextColor(Color.parseColor("#626262"));
+                        SetFilter(resents_icon, "#212121", 1);
+                        main_background.setBlurRadius(10);
+                        main_background.setOverlayColor(Color.parseColor("#41FFFFFF"));
+                    }
+                }
+                SetFilter(app_list_ic, "#FF00A3FF", 1);
+                SetFilter(resent_app_list_ic, "#FFFF8181", 1);
+                SetFilter(shortcut_ic, "#FFFFAD5C", 1);
+                SetFilter(cc_ic, "#FF909AFF", 1);
+                SetFilter(clear_bin, "#FFFFFFFF", 1);
+                // BlurTheLayout(floating_dock_bg, 4);
+                BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver() {
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void onReceive(Context ctxt, Intent intent) {
+                        int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                        int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                        float batteryPct = level * 100 / (float) scale;
+                        battery_idi_txt.setText(batteryPct + "%");
+                        battery_idi.setProgress((int) batteryPct);
+                    }
+                };
+                registerReceiver(mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                GetBackGroundServicesList(GetBackgroundList, MainActivity.this);
+                LoadApps();
+                window_title.setText("Device Apps" + " [ " + Generate_APPS_LIST.size() + " ]");
+                Task_list.setAdapter(new Task_Adapter(Generate_APPS_LIST));
+                Task_list.setNumColumns(3);
+                ANIM_FADE_IN(floating_dock_bg);
+            }
+        });
 
         Task_list.setOnItemClickListener((adapterView, v, i, l) -> {
             Intent launchIntent = getPackageManager().getLaunchIntentForPackage(Objects.requireNonNull(Generate_APPS_LIST.get(i).get("pack")).toString());
 
             ActivityTransition(img, "", launchIntent);
             Close_UserPanel();
-        });
-
-        AsyncTask.execute(() -> {
-            LoadApps();
-            BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver() {
-                @SuppressLint("SetTextI18n")
-                @Override
-                public void onReceive(Context ctxt, Intent intent) {
-                    int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-                    int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-                    float batteryPct = level * 100 / (float) scale;
-                    battery_idi_txt.setText(batteryPct + "%");
-                    battery_idi.setProgress((int) batteryPct);
-                }
-            };
-            registerReceiver(mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-            GetBackGroundServicesList(GetBackgroundList, MainActivity.this);
-            window_title.setText("Device Apps" + " [ " + Generate_APPS_LIST.size() + " ]");
-            ANIM_FADE_IN(floating_dock_bg);
-            Task_list.setAdapter(new Task_Adapter(Generate_APPS_LIST));
-            Task_list.setNumColumns(3);
         });
 
         slide_diss_bg.setOnTouchListener((v, p2) -> {
@@ -689,15 +829,7 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
                     x2 = p2.getX();
                     if (((y2 - y1) < -250)) {
                         //up
-                        DarkUtils.DarkAnimations.Slide_Up(floating_dock_bg, 1, MainActivity.this);
-                        ANIM_FADEOUT(floating_dock_bg);
-                        T_close_floating_dock = new TimerTask() {
-                            @Override
-                            public void run() {
-                                runOnUiThread(() -> Close_UserPanel());
-                            }
-                        };
-                        timer_close_floating_dock.schedule(T_close_floating_dock, 1000);
+                        Close_UserPanel();
                     }
                     break;
             }
@@ -712,11 +844,6 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
             floating_dock_bg.startAnimation(animation);
             Close_UserPanel();
         });
-
-        SetBackData(8, "#FFFFFFFF", 3, "#FF00A3FF", btn_box);
-        SetBackData(18, "#FF8B81FF", 0, "#FF00A3FF", clean_back_bg);
-        SetBackData(14, "#C4FFFFFF", 2, "#FFFFFFFF", floating_dock_bg);
-        BlurTheLayout(floating_dock_bg, 10);
 
         cell_data.setOnClickListener(v -> {
 
@@ -739,6 +866,7 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
             Task_list.setAdapter(new Task_Adapter(GetBackgroundList));
             Task_list.setVisibility(View.VISIBLE);
             bg_cc_base.setVisibility(View.GONE);
+
         });
 
         shortcut_ic.setOnClickListener(v -> {
@@ -783,13 +911,15 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
         });
 
         windowManager2.addView(displayView2, layoutParams2);
+        Show_Usr = true;
     }
 
     public void Close_System_Dock() {
         try {
             windowManager.removeView(displayView);
             Show_DOCK = false;
-
+            main_background.setBlurRadius(0);
+            main_background.setOverlayColor(Color.TRANSPARENT);
         } catch (Exception ignored) {
         }
     }
@@ -802,10 +932,26 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
     }
 
     public void Close_UserPanel() {
-        try {
-            windowManager2.removeView(displayView2);
-
-        } catch (Exception ignored) {
+        if (Show_Usr) {
+            try {
+                main_background.setBlurRadius(0);
+                main_background.setOverlayColor(Color.TRANSPARENT);
+                ANIM_FADEOUT(displayView2.findViewById(R.id.floating_dock_bg));
+                T_close_floating_dock = new TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                windowManager2.removeView(displayView2);
+                                Show_Usr = false;
+                            }
+                        });
+                    }
+                };
+                timer_close_floating_dock.schedule(T_close_floating_dock, 1000);
+            } catch (Exception ignored) {
+            }
         }
     }
 
@@ -853,20 +999,19 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
         LayoutInflater settings_dialog_layout = getLayoutInflater();
         View settings_dialog_view = settings_dialog_layout.inflate(R.layout.settings_dailog, null);
         settings_dialog.setView(settings_dialog_view);
-        final BlurView settings_dialog_bg = settings_dialog_view.findViewById(R.id.settings_dialog_bg);
-        final RoundedImageView setting_theme_light = settings_dialog_view.findViewById(R.id.setting_theme_light);
-        final RoundedImageView setting_theme_dark = settings_dialog_view.findViewById(R.id.setting_theme_dark);
+        final LinearLayout settings_dialog_bg = settings_dialog_view.findViewById(R.id.settings_dialog_bg);
+//        final LinearLayout settings_main_bg = settings_dialog_view.findViewById(R.id.settings_main_bg);
+//        final RoundedImageView setting_theme_light = settings_dialog_view.findViewById(R.id.setting_theme_light);
+//        final RoundedImageView setting_theme_dark = settings_dialog_view.findViewById(R.id.setting_theme_dark);
         final ImageView img_acc = settings_dialog_view.findViewById(R.id.img_acc);
-        final ImageView img_app = settings_dialog_view.findViewById(R.id.img_app);
 
         img_acc.getDrawable().setColorFilter(Color.parseColor("#FF686868"), PorterDuff.Mode.MULTIPLY);
-        img_app.getDrawable().setColorFilter(Color.parseColor("#FF686868"), PorterDuff.Mode.MULTIPLY);
         SetBackData(14, "#BFF0F8FF", 10, "#FFFFFFFF", settings_dialog_bg);
+
 
         settings_dialog.setCancelable(true);
         settings_dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         settings_dialog.show();
-        BlurTheLayout(settings_dialog_bg, 5);
     }
 
     public void ShowSideBar(View Show) {
@@ -914,23 +1059,6 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
         txt.setText(simpleDateFormat.format(calander.getTime()));
     }
 
-    @Override
-    public void onWifiStateChanged(WifiState state, String ssid) {
-
-        switch (state) {
-            case DISABLED:
-                SetState(1);
-                break;
-            case ENABLED:
-                SetState(2);
-                break;
-            case CONNECTED:
-                SetState(3);
-                break;
-        }
-
-    }
-
     public class Task_Adapter extends BaseAdapter {
 
         final ArrayList<HashMap<String, Object>> _data;
@@ -964,6 +1092,14 @@ public class MainActivity extends AppCompatActivity implements WifiStateListener
             final LinearLayout tasks_lis_bg = listitemView.findViewById(R.id.tasks_lis_bg);
             final RoundedImageView icon_task = listitemView.findViewById(R.id.icon_task);
             final TextView txt_task = listitemView.findViewById(R.id.txt_task);
+
+            if (IsDarkSystem()) {
+                txt_task.setTextColor(Color.parseColor("#FFFFFF"));
+            } else {
+                if (IsDarkSystem()) {
+                    txt_task.setTextColor(Color.parseColor("#626262"));
+                }
+            }
 
             final PackageManager pm = getPackageManager();
             ApplicationInfo ai;
