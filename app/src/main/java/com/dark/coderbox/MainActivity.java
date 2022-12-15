@@ -6,7 +6,6 @@ import static com.dark.coderbox.DarkServices.DarkUtils.ShowMessage;
 import static com.dark.coderbox.DarkServices.EnvPathVariables.DEFAULT_WALLPAPER;
 import static com.dark.coderbox.DarkServices.EnvPathVariables.SYSTEM_DATA_FILE;
 import static com.dark.coderbox.DarkServices.ThemeMannager.ThemeModule.ANIM_FADEOUT;
-import static com.dark.coderbox.DarkServices.ThemeMannager.ThemeModule.ANIM_FADE_IN;
 import static com.dark.coderbox.DarkServices.ThemeMannager.ThemeModule.ColourAnim;
 import static com.dark.coderbox.DarkServices.ThemeMannager.ThemeModule.SetBackData;
 import static com.dark.coderbox.libs.FileUtil.getExternalStorageDir;
@@ -105,12 +104,16 @@ import eightbitlab.com.blurview.RenderScriptBlur;
 @SuppressLint("ClickableViewAccessibility")
 public class MainActivity extends AppCompatActivity {
 
+    public static final ArrayList<HashMap<String, Object>> Generate_APPS_LIST = new ArrayList<>();
     public static String COLOR_ACCENT;
     public static String COLOR_BASE = "FFFFFF";
     public static String COLOR_DOMINANT = "2E2E2E";
     public static String COLOR_PRIMARY;
     public static String COLOR_SECONDARY;
     public static String COLOR_TERTIARY;
+    public static String Battery_percentage = "";
+    public static View displayView2;
+    private static RealtimeBlurView main_background;
     //Arrays
     public final ArrayList<String> list = new ArrayList<>();
     public final ArrayList<String> folderList = new ArrayList<>();
@@ -119,9 +122,9 @@ public class MainActivity extends AppCompatActivity {
     public final ArrayList<HashMap<String, Object>> Files = new ArrayList<>();
     public final ArrayList<Drawable> Generate_APPS_Icons_LIST = new ArrayList<>();
     public final ArrayList<String> Generate_APPS_Name_LIST = new ArrayList<>();
-    public final ArrayList<HashMap<String, Object>> Generate_APPS_LIST = new ArrayList<>();
     //Strings
     public String base_color = "#FF00A3FF";
+    public int Battery_int = 0;
     //Booleans
     public boolean Show_DOCK = false;
     public boolean Show_Usr = false;
@@ -137,7 +140,6 @@ public class MainActivity extends AppCompatActivity {
     public TimerTask T_close_floating_dock2;
     public WindowManager windowManager2;
     public WindowManager.LayoutParams layoutParams2;
-    public View displayView2;
     public WindowManager windowManager;
     public WindowManager.LayoutParams layoutParams;
     public View displayView;
@@ -156,7 +158,6 @@ public class MainActivity extends AppCompatActivity {
     WifiStateReceiver wifiStateReceiver;
     private LinearLayout bg_main;
     private LinearLayout test_body;
-    private RealtimeBlurView main_background;
     private ImageView img;
     private Chip chip;
 
@@ -172,11 +173,22 @@ public class MainActivity extends AppCompatActivity {
         return b;
     }
 
-    public void Corners(int TL, int TR, int BL, int BR, String color_data, View view) {
+    public static void Corners(int TL, int TR, int BL, int BR, String color_data, View view) {
         GradientDrawable data = new GradientDrawable();
         data.setCornerRadii(new float[]{TL, TL, TR, TR, BL, BL, BR, BR});
         data.setColor(Color.parseColor(color_data));
         view.setBackground(data);
+    }
+
+    public static void SetFilter(ImageView imageView, String base_color, int Case) {
+        if (Case == 0) {
+            imageView.setColorFilter(Color.parseColor(base_color), PorterDuff.Mode.MULTIPLY);
+        } else {
+            if (Case == 1) {
+                imageView.setColorFilter(Color.parseColor(base_color), PorterDuff.Mode.SRC_IN);
+            }
+        }
+
     }
 
     public boolean isHomeApp() {
@@ -311,6 +323,20 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onReceive(Context ctxt, Intent intent) {
+                int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                float batteryPct = level * 100 / (float) scale;
+                Battery_percentage = batteryPct + "%";
+                Battery_int = (int) batteryPct;
+            }
+        };
+        registerReceiver(mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        LoadApps();
 
     }
 
@@ -694,17 +720,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void SetFilter(ImageView imageView, String base_color, int Case) {
-        if (Case == 0) {
-            imageView.setColorFilter(Color.parseColor(base_color), PorterDuff.Mode.MULTIPLY);
-        } else {
-            if (Case == 1) {
-                imageView.setColorFilter(Color.parseColor(base_color), PorterDuff.Mode.SRC_IN);
-            }
-        }
-
-    }
-
     public void ShowUserPanel() {
         windowManager2 = (WindowManager) getSystemService(WINDOW_SERVICE);
         layoutParams2 = new WindowManager.LayoutParams();
@@ -756,60 +771,8 @@ public class MainActivity extends AppCompatActivity {
         bg_cc_base.setVisibility(View.GONE);
         Task_list.setVisibility(View.VISIBLE);
 
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (IsDarkSystem()) {
-                    SetBackData(8, "#212121", 3, "#FF00A3FF", btn_box);
-                    SetBackData(18, "#FF8B81FF", 0, "#FF00A3FF", clean_back_bg);
-                    SetBackData(14, "#A22F2F2F", 2, "#FFFFFFFF", floating_dock_bg);
-                    Corners(0, 10, 0, 10, "#282828", top_user_panel);
-                    Corners(10, 0, 10, 0, "#282828", left_user_panel);
-                    Corners(0, 0, 10, 10, "#282828", bottom_user_panel);
-                    SetFilter(resents_icon, "#FFFFFF", 1);
-                    window_title.setTextColor(Color.parseColor("#FFFFFF"));
-                    main_background.setBlurRadius(10);
-                    main_background.setOverlayColor(Color.parseColor("#72202020"));
-                } else {
-                    if (!IsDarkSystem()) {
-                        SetBackData(8, "#FFFFFF", 3, "#FF00A3FF", btn_box);
-                        SetBackData(18, "#FF8B81FF", 0, "#FF00A3FF", clean_back_bg);
-                        SetBackData(14, "#A2FFFFFF", 2, "#FFFFFFFF", floating_dock_bg);
-                        Corners(0, 10, 0, 10, "#FFFFFF", top_user_panel);
-                        Corners(10, 0, 10, 0, "#FFFFFF", left_user_panel);
-                        Corners(0, 0, 10, 10, "#FFFFFF", bottom_user_panel);
-                        window_title.setTextColor(Color.parseColor("#626262"));
-                        SetFilter(resents_icon, "#212121", 1);
-                        main_background.setBlurRadius(10);
-                        main_background.setOverlayColor(Color.parseColor("#41FFFFFF"));
-                    }
-                }
-                SetFilter(app_list_ic, "#FF00A3FF", 1);
-                SetFilter(resent_app_list_ic, "#FFFF8181", 1);
-                SetFilter(shortcut_ic, "#FFFFAD5C", 1);
-                SetFilter(cc_ic, "#FF909AFF", 1);
-                SetFilter(clear_bin, "#FFFFFFFF", 1);
-                // BlurTheLayout(floating_dock_bg, 4);
-                BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver() {
-                    @SuppressLint("SetTextI18n")
-                    @Override
-                    public void onReceive(Context ctxt, Intent intent) {
-                        int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-                        int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-                        float batteryPct = level * 100 / (float) scale;
-                        battery_idi_txt.setText(batteryPct + "%");
-                        battery_idi.setProgress((int) batteryPct);
-                    }
-                };
-                registerReceiver(mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-                GetBackGroundServicesList(GetBackgroundList, MainActivity.this);
-                LoadApps();
-                window_title.setText("Device Apps" + " [ " + Generate_APPS_LIST.size() + " ]");
-                Task_list.setAdapter(new Task_Adapter(Generate_APPS_LIST));
-                Task_list.setNumColumns(3);
-                ANIM_FADE_IN(floating_dock_bg);
-            }
-        });
+        UserPanel task = new UserPanel();
+        task.execute(10);
 
         Task_list.setOnItemClickListener((adapterView, v, i, l) -> {
             Intent launchIntent = getPackageManager().getLaunchIntentForPackage(Objects.requireNonNull(Generate_APPS_LIST.get(i).get("pack")).toString());
@@ -936,6 +899,8 @@ public class MainActivity extends AppCompatActivity {
             try {
                 main_background.setBlurRadius(0);
                 main_background.setOverlayColor(Color.TRANSPARENT);
+                UserPanel task = new UserPanel();
+                task.cancel(true);
                 ANIM_FADEOUT(displayView2.findViewById(R.id.floating_dock_bg));
                 T_close_floating_dock = new TimerTask() {
                     @Override
@@ -1208,4 +1173,91 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    private class UserPanel extends AsyncTask<Integer, Integer, String> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected String doInBackground(Integer... integers) {
+
+            BlurView floating_dock_bg = displayView2.findViewById(R.id.floating_dock_bg);
+
+            LinearLayout btn_box = displayView2.findViewById(R.id.btn_box);
+            LinearLayout clean_back_bg = displayView2.findViewById(R.id.clean_back_bg);
+            LinearLayout left_user_panel = displayView2.findViewById(R.id.left_user_panel);
+            LinearLayout top_user_panel = displayView2.findViewById(R.id.top_user_panel);
+            LinearLayout bottom_user_panel = displayView2.findViewById(R.id.bottom_user_panel);
+
+            ImageView resents_icon = displayView2.findViewById(R.id.resents_icon);
+            ImageView app_list_ic = displayView2.findViewById(R.id.apps_ic);
+            ImageView resent_app_list_ic = displayView2.findViewById(R.id.resent_apps_ic);
+            ImageView shortcut_ic = displayView2.findViewById(R.id.shaortcut_ic);
+            ImageView cc_ic = displayView2.findViewById(R.id.Cc_ic);
+            ImageView clear_bin = displayView2.findViewById(R.id.clear_bin);
+
+            TextView window_title = displayView2.findViewById(R.id.window_title);
+            TextView battery_idi_txt = displayView2.findViewById(R.id.battery_idi_txt);
+
+            GridView Task_list = displayView2.findViewById(R.id.task_grid);
+
+            ProgressBar battery_idi = displayView2.findViewById(R.id.battery_idi);
+
+            if (IsDarkSystem()) {
+                SetBackData(8, "#212121", 3, "#FF00A3FF", btn_box);
+                SetBackData(18, "#FF8B81FF", 0, "#FF00A3FF", clean_back_bg);
+                SetBackData(14, "#A22F2F2F", 2, "#FFFFFFFF", floating_dock_bg);
+                Corners(0, 10, 0, 10, "#282828", top_user_panel);
+                Corners(10, 0, 10, 0, "#282828", left_user_panel);
+                Corners(0, 0, 10, 10, "#282828", bottom_user_panel);
+                SetFilter(resents_icon, "#FFFFFF", 1);
+                window_title.setTextColor(Color.parseColor("#FFFFFF"));
+                main_background.setBlurRadius(10);
+                main_background.setOverlayColor(Color.parseColor("#72202020"));
+            } else {
+                if (!IsDarkSystem()) {
+                    SetBackData(8, "#FFFFFF", 3, "#FF00A3FF", btn_box);
+                    SetBackData(18, "#FF8B81FF", 0, "#FF00A3FF", clean_back_bg);
+                    SetBackData(14, "#A2FFFFFF", 2, "#FFFFFFFF", floating_dock_bg);
+                    Corners(0, 10, 0, 10, "#FFFFFF", top_user_panel);
+                    Corners(10, 0, 10, 0, "#FFFFFF", left_user_panel);
+                    Corners(0, 0, 10, 10, "#FFFFFF", bottom_user_panel);
+                    window_title.setTextColor(Color.parseColor("#626262"));
+                    SetFilter(resents_icon, "#212121", 1);
+                    main_background.setBlurRadius(10);
+                    main_background.setOverlayColor(Color.parseColor("#41FFFFFF"));
+                }
+            }
+            SetFilter(app_list_ic, "#FF00A3FF", 1);
+            SetFilter(resent_app_list_ic, "#FFFF8181", 1);
+            SetFilter(shortcut_ic, "#FFFFAD5C", 1);
+            SetFilter(cc_ic, "#FF909AFF", 1);
+            SetFilter(clear_bin, "#FFFFFFFF", 1);
+
+            battery_idi_txt.setText(Battery_percentage);
+            battery_idi.setProgress(Battery_int);
+
+            window_title.setText("Device Apps" + " [ " + Generate_APPS_LIST.size() + " ]");
+            Task_list.setAdapter(new Task_Adapter(Generate_APPS_LIST));
+            Task_list.setNumColumns(3);
+
+            return "Finished!";
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+
+        }
+
+        @Override
+        protected void onPostExecute(String string) {
+            super.onPostExecute(string);
+
+        }
+    }
+
 }
