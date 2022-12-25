@@ -25,7 +25,7 @@ FEATURES
 (Only For Developers) 
 
 
+![projectinfo](https://user-images.githubusercontent.com/67579112/209464595-af7c048a-b0ed-44f1-bbd0-6355dd05a8d6.png)
 
-![thumbnail](https://user-images.githubusercontent.com/67579112/197989182-39b1c93d-eb52-49ab-bd08-2d2b39d56e17.png)
 
 > [Download The Defult Theme](https://github.com/DarkCode462/Coder-Box/raw/master/THEMES.zip)
