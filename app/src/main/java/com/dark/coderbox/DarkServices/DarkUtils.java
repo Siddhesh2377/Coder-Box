@@ -19,9 +19,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class DarkUtils {
-    public static void ShowMessage(String txt, Context context) {
+    public static void ShowMessage(StringBuilder txt, Context context) {
         //Toast
-        Toast.makeText(context, txt, Toast.LENGTH_LONG).show();
+        Toast.makeText(context, txt, Toast.LENGTH_SHORT).show();
     }
 
     public static void copyAssets(Context context) {

@@ -28,7 +28,7 @@ public class WifiStateReceiver extends BroadcastReceiver {
 
     @SuppressWarnings("ForwardCompatibility")
     @Override
-    public void onReceive(Context context, Intent _) {
+    public void onReceive(Context context, Intent intent) {
         final WifiManager wifiMan = context.getSystemService(WifiManager.class);
         final boolean isEnabled = wifiMan.isWifiEnabled();
         if (!isEnabled) {

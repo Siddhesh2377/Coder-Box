@@ -61,6 +61,8 @@ public class SetUpActivity extends AppCompatActivity {
     public int Android11 = Build.VERSION_CODES.R;
     public int Android10 = Build.VERSION_CODES.Q;
 
+    public boolean InitSystem = false;
+
     AlertDialog custom_progressbar;
     TextView txt;
 
@@ -71,19 +73,7 @@ public class SetUpActivity extends AppCompatActivity {
 
         txt = findViewById(R.id.textView);
 
-        //Logic
-        if (Build.VERSION.SDK_INT >= Android11) {
-            if (!Environment.isExternalStorageManager() || !Settings.canDrawOverlays(this)) {
-                ManageStoragePermission();
-                AskCanDrawOverLayPermission();
-            }
-        }
-        if (Build.VERSION.SDK_INT <= Android10) {
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED || checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1000);
-                AskCanDrawOverLayPermission();
-            }
-        }
+        //End ...< _ >...
     }
 
     public void ActivityTransition(final View _view, final String _transitionName, final Intent _intent) {
@@ -94,7 +84,7 @@ public class SetUpActivity extends AppCompatActivity {
     }
 
     private void downloading() {
-        ShowMessage("Download Started !", SetUpActivity.this);
+        ShowMessage(new StringBuilder("Download Started !"), SetUpActivity.this);
         ExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
@@ -116,7 +106,6 @@ public class SetUpActivity extends AppCompatActivity {
 
             int count;
 
-            @Override
             public void run() {
 
                 //Background work here
@@ -162,14 +151,14 @@ public class SetUpActivity extends AppCompatActivity {
                             //UI Thread work here
                             custom_progressbar.dismiss();
                             unzip(SYSTEM_FOLDER.concat("/THEMES.zip"), SYSTEM_FOLDER);
-                            ShowMessage("Completed", SetUpActivity.this);
-
+                            ShowMessage(new StringBuilder("Completed"), SetUpActivity.this);
+                            InitSystem = true;
                             Intent i = new Intent(getApplicationContext(), MainActivity.class);
                             ActivityTransition(txt, "", i);
                         }
                     });
                 } catch (Exception e) {
-                    ShowMessage(e.toString(), SetUpActivity.this);
+                    ShowMessage(new StringBuilder(e.toString()), SetUpActivity.this);
                 }
             }
         });
@@ -177,7 +166,41 @@ public class SetUpActivity extends AppCompatActivity {
 
     public void onResume() {
         super.onResume();
-        INIT_SYSTEM();
+
+        if (InitSystem){
+            Intent i = new Intent(getApplicationContext(), MainActivity.class);
+            ActivityTransition(txt, "", i);
+        }else {
+            if (!InitSystem){
+                if (Build.VERSION.SDK_INT <= Android10) {
+                    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED || checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+                        requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1000);
+                    } else {
+                        if (!Settings.canDrawOverlays(this)) {
+                            AskCanDrawOverLayPermission();
+                        } else {
+                            if (Environment.isExternalStorageManager()) {
+                                INIT_SYSTEM();
+                            }
+                        }
+                    }
+                } else {
+                    if (Build.VERSION.SDK_INT >= Android11) {
+                        if (!Environment.isExternalStorageManager()) {
+                            ManageStoragePermission();
+                        } else {
+                            if (!Settings.canDrawOverlays(this)) {
+                                AskCanDrawOverLayPermission();
+                            } else {
+                                if (Environment.isExternalStorageManager()) {
+                                    INIT_SYSTEM();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public boolean isConnected() {
@@ -213,7 +236,7 @@ public class SetUpActivity extends AppCompatActivity {
                     downloading();
                 } else {
                     if (!isConnected()) {
-                        ShowMessage("Connect To the INTERNET !", this);
+                        ShowMessage(new StringBuilder("Connect To the INTERNET !"), this);
                     }
                 }
             }

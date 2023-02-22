@@ -43,7 +43,7 @@ public class Setup {
                     writeFile(THEME_PATH_FILE, "");
                     writeFile(THEME_PATH_FILE, new Gson().toJson(Generated_Theme_list));
                 } else {
-                    ShowMessage("Theme Exist !", context);
+                    ShowMessage(new StringBuilder("Theme Exist !"), context);
                 }
             } else {
                 writeFile(THEME_PATH_FILE, "");

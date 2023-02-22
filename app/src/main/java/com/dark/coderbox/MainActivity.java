@@ -18,10 +18,13 @@ import static com.dark.coderbox.libs.LanguageXR.READ_XR_DATA;
 import static com.dark.coderbox.libs.LanguageXR.WriteSystemInfo;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.AppOpsManager;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
@@ -40,7 +43,8 @@ import android.graphics.drawable.GradientDrawable;
 import android.icu.text.SimpleDateFormat;
 import android.icu.util.Calendar;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -57,8 +61,8 @@ import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.CompoundButton;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -66,27 +70,23 @@ import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.budiyev.android.codescanner.CodeScanner;
-import com.budiyev.android.codescanner.CodeScannerView;
-import com.budiyev.android.codescanner.DecodeCallback;
 import com.dark.coderbox.DarkServices.Connections.WifiStateReceiver;
 import com.dark.coderbox.libs.FileUtil;
 import com.dark.coderbox.libs.Keys;
 import com.github.mmin18.widget.RealtimeBlurView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.color.DynamicColors;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.google.zxing.Result;
 import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.util.ArrayList;
@@ -105,15 +105,9 @@ import eightbitlab.com.blurview.RenderScriptBlur;
 public class MainActivity extends AppCompatActivity {
 
     public static final ArrayList<HashMap<String, Object>> Generate_APPS_LIST = new ArrayList<>();
-    public static String COLOR_ACCENT;
     public static String COLOR_BASE = "FFFFFF";
     public static String COLOR_DOMINANT = "2E2E2E";
-    public static String COLOR_PRIMARY;
-    public static String COLOR_SECONDARY;
-    public static String COLOR_TERTIARY;
     public static String Battery_percentage = "";
-    public static View displayView2;
-    private static RealtimeBlurView main_background;
     //Arrays
     public final ArrayList<String> list = new ArrayList<>();
     public final ArrayList<String> folderList = new ArrayList<>();
@@ -122,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
     public final ArrayList<HashMap<String, Object>> Files = new ArrayList<>();
     public final ArrayList<Drawable> Generate_APPS_Icons_LIST = new ArrayList<>();
     public final ArrayList<String> Generate_APPS_Name_LIST = new ArrayList<>();
+    public View displayView2;
     //Strings
     public String base_color = "#FF00A3FF";
     public int Battery_int = 0;
@@ -136,8 +131,6 @@ public class MainActivity extends AppCompatActivity {
     public Timer system_notification_T = new Timer();
     public Timer timer_close_floating_dock = new Timer();
     public TimerTask T_close_floating_dock;
-    public Timer timer_close_floating_dock2 = new Timer();
-    public TimerTask T_close_floating_dock2;
     public WindowManager windowManager2;
     public WindowManager.LayoutParams layoutParams2;
     public WindowManager windowManager;
@@ -149,15 +142,13 @@ public class MainActivity extends AppCompatActivity {
     public double x1 = 0;
     public double y2 = 0;
     public double x2 = 0;
-    //Int
-    public int count_F_D_M = 0;
     public int v_floating_dock_shortcuts = View.VISIBLE;
     public int H = 0;
     public LinearLayout controls_border;
     public String CurrentTheme = READ_XR_DATA(SYSTEM_XR, Keys.XRLanguages.ThemeProvider, SYSTEM_DATA_FILE);
     WifiStateReceiver wifiStateReceiver;
+    private RealtimeBlurView main_background;
     private LinearLayout bg_main;
-    private LinearLayout test_body;
     private ImageView img;
     private Chip chip;
 
@@ -189,14 +180,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-    }
-
-    public boolean isHomeApp() {
-        final Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        final ResolveInfo res = getPackageManager().resolveActivity(intent, 0);
-        return res.activityInfo != null && getPackageName()
-                .equals(res.activityInfo.packageName);
     }
 
     @SuppressLint({"ClickableViewAccessibility", "MissingInflatedId", "SuspiciousIndentation", "ResourceAsColor"})
@@ -256,13 +239,10 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     //RIGHT
-                    if (((x1 - x2) < -250)) {
-
-                        H = bg_main.getHeight() / 3;
-                        ShowMessage(String.valueOf(H), this);
-                        // ShowSideBar(controls_border);
-                        ShowSettingDialog();
-                    }
+                    //                        H = bg_main.getHeight() / 3;
+                    //                        ShowMessage(String.valueOf(H), this);
+                    //                        // ShowSideBar(controls_border);
+                    //                        ShowSettingDialog();
 
                     //LEFT
                     if (((x2 - x1) < -250)) {
@@ -276,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (!IsDarkSystem()) {
-            chip.setChipBackgroundColor(ColorStateList.valueOf(getResources().getColor(com.google.android.material.R.color.material_dynamic_secondary50)));
+            chip.setChipBackgroundColor(ColorStateList.valueOf(ContextCompat.getColor(this, com.google.android.material.R.color.material_dynamic_secondary50)));
             chip.setTextColor(Color.parseColor("#2196F3"));
             chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#2196F3")));
 
@@ -289,37 +269,32 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        chip.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#2196F3")));
-                    chip.setTextColor(Color.parseColor("#FFFFFF"));
-                    chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#FFFFFF")));
-                    WriteSystemInfo(SYSTEM_DATA_FILE, SYSTEM_XR, ThemeProvider, "DATA.OPEN : Current.Theme C : Dark : Data.Close", MainActivity.this);
-                    Show_Notification("Theme Set To Dark", SysOk);
-                    Close_System_Dock();
-                    Show_System_Dock();
-                    Show_DOCK = true;
-                    if (Show_Usr) {
-                        Close_UserPanel();
-                        ShowUserPanel();
-                    }
-                } else {
-                    if (!isChecked) {
-                        chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#FFFFFF")));
-                        chip.setTextColor(Color.parseColor("#2196F3"));
-                        chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#2196F3")));
-                        WriteSystemInfo(SYSTEM_DATA_FILE, SYSTEM_XR, ThemeProvider, "DATA.OPEN : Current.Theme C : Lite : Data.Close", MainActivity.this);
-                        Show_Notification("Theme Set To Lite", SysOk);
-                        Close_System_Dock();
-                        Show_System_Dock();
-                        Show_DOCK = true;
-                        if (Show_Usr) {
-                            Close_UserPanel();
-                            ShowUserPanel();
-                        }
-                    }
+        chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#2196F3")));
+                chip.setTextColor(Color.parseColor("#FFFFFF"));
+                chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#FFFFFF")));
+                WriteSystemInfo(SYSTEM_DATA_FILE, SYSTEM_XR, ThemeProvider, "DATA.OPEN : Current.Theme C : Dark : Data.Close", MainActivity.this);
+                Show_Notification("Theme Set To Dark", SysOk);
+                Close_System_Dock();
+                Show_System_Dock();
+                Show_DOCK = true;
+                if (Show_Usr) {
+                    Close_UserPanel();
+                    ShowUserPanel();
+                }
+            } else {
+                chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#FFFFFF")));
+                chip.setTextColor(Color.parseColor("#2196F3"));
+                chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#2196F3")));
+                WriteSystemInfo(SYSTEM_DATA_FILE, SYSTEM_XR, ThemeProvider, "DATA.OPEN : Current.Theme C : Lite : Data.Close", MainActivity.this);
+                Show_Notification("Theme Set To Lite", SysOk);
+                Close_System_Dock();
+                Show_System_Dock();
+                Show_DOCK = true;
+                if (Show_Usr) {
+                    Close_UserPanel();
+                    ShowUserPanel();
                 }
             }
         });
@@ -371,12 +346,19 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    public int GetColor(int CASE) {
+    private boolean hasPermission() {
+        AppOpsManager appOps = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
+        int uid = android.os.Process.myUid();
+        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, uid, getPackageName());
+        return mode == AppOpsManager.MODE_ALLOWED;
+    }
+
+    public int GetColor() {
         Bitmap icon = BitmapFactory.decodeFile(DEFAULT_WALLPAPER);
         Palette p = Palette.from(icon).generate();
         Palette.Swatch vibrantSwatch = p.getDarkMutedSwatch();
-        ShowMessage(String.valueOf(vibrantSwatch.getRgb()), this);
-        return p.getLightVibrantColor(getResources().getColor(android.R.color.black));
+        ShowMessage(new StringBuilder(String.valueOf(Objects.requireNonNull(vibrantSwatch).getRgb())), this);
+        return p.getLightVibrantColor(ContextCompat.getColor(this, android.R.color.black));
     }
 
     public void SetupLogic() {
@@ -412,12 +394,35 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void LoadBackground() {
+        if (!hasPermission()) {
+            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+            startActivity(intent);
+        } else {
+            UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+            long time = System.currentTimeMillis();
+            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_BEST, time - 1000 * 10, time);
+
+            for (UsageStats usageStats : usageStatsList) {
+                if (usageStats.getLastTimeUsed() >= time - 1000 * 10) {
+                    StringBuilder packageName = new StringBuilder(usageStats.getPackageName());
+                    ShowMessage(packageName, MainActivity.this);
+                    {
+                        HashMap<String, Object> _item = new HashMap<>();
+                        _item.put("pack", packageName);
+                        GetBackgroundList.add(_item);
+                    }
+                }
+            }
+        }
+    }
+
     public void Show_Notification(String message, int type) {
-        View noti_view = getLayoutInflater().inflate(R.layout.shownotifications, null);
-        final PopupWindow system_notification = new PopupWindow(noti_view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-        final LinearLayout bg_system_notification = noti_view.findViewById(R.id.bg_system_notification);
-        final LinearLayout indicator_system_notification = noti_view.findViewById(R.id.indicator_system_notification);
-        final TextView txt_system_notification = noti_view.findViewById(R.id.txt_system_notification);
+        @SuppressLint("InflateParams") View not_view = getLayoutInflater().inflate(R.layout.shownotifications, null);
+        final PopupWindow system_notification = new PopupWindow(not_view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        final LinearLayout bg_system_notification = not_view.findViewById(R.id.bg_system_notification);
+        final LinearLayout indicator_system_notification = not_view.findViewById(R.id.indicator_system_notification);
+        final TextView txt_system_notification = not_view.findViewById(R.id.txt_system_notification);
 
         if (READ_XR_DATA(SYSTEM_XR, Keys.XRLanguages.ThemeProvider, SYSTEM_DATA_FILE).contains("Lite")) {
             SetBackData(16, "#FFFFFF", 2, "#2C2C2C", bg_system_notification);
@@ -453,17 +458,13 @@ public class MainActivity extends AppCompatActivity {
         systemNotification_timer = new TimerTask() {
             @Override
             public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        system_notification.dismiss();
-                    }
-                });
+                runOnUiThread(system_notification::dismiss);
             }
         };
         system_notification_T.schedule(systemNotification_timer, 2500);
     }
 
+    @SuppressLint("InflateParams")
     public void Show_System_Dock() {
         if (!Settings.canDrawOverlays(this)) {
             //Can Draw Overlays Permission
@@ -533,24 +534,23 @@ public class MainActivity extends AppCompatActivity {
             T_ = new TimerTask() {
                 @Override
                 public void run() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            GetTime(Time_View);
-                            isEnabled[0] = wifiMan.isWifiEnabled();
-                            ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-                            NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-                            if (isEnabled[0]) {
-                                if (mWifi.isConnected()) {
-                                    SetState(3);
-                                } else {
-                                    if (isEnabled[0]) {
-                                        SetState(2);
-                                    }
-                                }
+                    runOnUiThread(() -> {
+                        GetTime(Time_View);
+                        isEnabled[0] = wifiMan.isWifiEnabled();
+                        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                        Network mWifi = connManager.getActiveNetwork();
+                        NetworkCapabilities capabilities = connManager.getNetworkCapabilities(mWifi);
+
+                        if (isEnabled[0]) {
+                            if (capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                                SetState(3);
                             } else {
-                                SetState(1);
+                                if (isEnabled[0]) {
+                                    SetState(2);
+                                }
                             }
+                        } else {
+                            SetState(1);
                         }
                     });
                 }
@@ -629,61 +629,14 @@ public class MainActivity extends AppCompatActivity {
                 displayView.findViewById(R.id.time_view).setVisibility(View.VISIBLE);
             });
 
-            Speed_box.setOnClickListener(view_ -> {
-                resent_services.setVisibility(resent_services.getVisibility());
-
-                View view = getLayoutInflater().inflate(R.layout.dialog_layout, null);
-                CodeScanner mCodeScanner;
-                final ArrayList<String>[] GeneratedQrData = new ArrayList[]{new ArrayList<>()};
-
-                MaterialAlertDialogBuilder dlg = new MaterialAlertDialogBuilder(this);
-
-                dlg.setTitle("Select Device");
-                dlg.setView(view);
-                dlg.setMessage("You can select one or Multi-pal Devices");
-
-                final CodeScannerView usr = view.findViewById(R.id.scanner_vie);
-
-                mCodeScanner = new CodeScanner(this, usr);
-
-                mCodeScanner.setDecodeCallback(new DecodeCallback() {
-                    @Override
-                    public void onDecoded(@NonNull final Result result) {
-                        GeneratedQrData[0] = new Gson().fromJson(result.getText(), new TypeToken<ArrayList<String>>() {
-                        }.getType());
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                            }
-                        });
-                    }
-                });
-
-                usr.setOnClickListener(view1 -> mCodeScanner.startPreview());
-
-                dlg.setPositiveButton("Connect", (dialog, which) -> {
-
-                });
-
-                dlg.setNegativeButton("Cancel", (dialog, which) -> dlg.create().cancel());
-
-                dlg.create().show();
-
-                dlg.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-
-                    }
-                });
-
-            });
+            Speed_box.setOnClickListener(view_ -> resent_services.setVisibility(resent_services.getVisibility()));
 
             nearbyServices.setOnClickListener(v -> {
-                ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                Network network = connMgr.getActiveNetwork();
+                NetworkCapabilities capabilities = connMgr.getNetworkCapabilities(network);
                 if (isEnabled[0]) {
-                    if (mWifi.isConnected()) {
+                    if (capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
                         SetState(3);
                         Show_Notification("Wifi Is Connected ! :)", SysMessage);
                     } else {
@@ -720,14 +673,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @SuppressLint({"InflateParams", "SetTextI18n"})
     public void ShowUserPanel() {
         windowManager2 = (WindowManager) getSystemService(WINDOW_SERVICE);
         layoutParams2 = new WindowManager.LayoutParams();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            layoutParams2.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        } else {
-            layoutParams2.type = WindowManager.LayoutParams.TYPE_PHONE;
-        }
+        layoutParams2.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         layoutParams2.format = PixelFormat.RGBA_8888;
         layoutParams2.gravity = Gravity.CENTER;
         layoutParams2.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -748,9 +698,6 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout bg_cc_base = displayView2.findViewById(R.id.bg_cc_base);
         LinearLayout Wifi_btn = displayView2.findViewById(R.id.wifi_btn);
         LinearLayout Bluetooth_btn = displayView2.findViewById(R.id.bluetooth_btn);
-        LinearLayout left_user_panel = displayView2.findViewById(R.id.left_user_panel);
-        LinearLayout top_user_panel = displayView2.findViewById(R.id.top_user_panel);
-        LinearLayout bottom_user_panel = displayView2.findViewById(R.id.bottom_user_panel);
         LinearLayout Bottom_bar = displayView2.findViewById(R.id.bottom_bar);
 
         ImageView resents_icon = displayView2.findViewById(R.id.resents_icon);
@@ -823,6 +770,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         resent_app_list_ic.setOnClickListener(v -> {
+            LoadBackground();
             ColourAnim(base_color, "#FFFF8181", btn_box);
             base_color = "#FFFF8181";
             window_title.setText("Background Services" + " [ " + GetBackgroundList.size() + " ]");
@@ -835,10 +783,11 @@ public class MainActivity extends AppCompatActivity {
         shortcut_ic.setOnClickListener(v -> {
             ColourAnim(base_color, "#FFFFAD5C", btn_box);
             base_color = "#FFFFAD5C";
-            window_title.setText("Saved Shortcuts");
+            window_title.setText("File Mannager");
             Task_list.setVisibility(View.VISIBLE);
             bg_cc_base.setVisibility(View.GONE);
             GetFiles(getExternalStorageDir());
+
             Task_list.setAdapter(new User_Panel(Files));
         });
 
@@ -859,8 +808,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Bluetooth_btn.setOnClickListener(v -> {
-            Intent panelIntent = new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
-            startActivityForResult(panelIntent, 1);
+            ActivityResultLauncher<Intent> launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == Activity.RESULT_OK) {
+                            //Results
+                        }
+                    });
+            launcher.launch(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
         });
 
         clean_back_bg.setOnClickListener(v -> {
@@ -872,6 +826,8 @@ public class MainActivity extends AppCompatActivity {
             Task_list.setVisibility(View.VISIBLE);
             bg_cc_base.setVisibility(View.GONE);
         });
+
+        Task_list.setOnItemLongClickListener((parent, view, position, id) -> false);
 
         windowManager2.addView(displayView2, layoutParams2);
         Show_Usr = true;
@@ -905,12 +861,9 @@ public class MainActivity extends AppCompatActivity {
                 T_close_floating_dock = new TimerTask() {
                     @Override
                     public void run() {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                windowManager2.removeView(displayView2);
-                                Show_Usr = false;
-                            }
+                        runOnUiThread(() -> {
+                            windowManager2.removeView(displayView2);
+                            Show_Usr = false;
                         });
                     }
                 };
@@ -926,7 +879,7 @@ public class MainActivity extends AppCompatActivity {
         folderList.clear();
         fileList.clear();
         FileUtil.listDir(_path, list);
-        Collections.sort(list, String.CASE_INSENSITIVE_ORDER);
+        list.sort(String.CASE_INSENSITIVE_ORDER);
         index = 0;
         for (int _repeat13 = 0; _repeat13 < list.size(); _repeat13++) {
 
@@ -980,17 +933,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void ShowSideBar(View Show) {
-        View SideBarView = getLayoutInflater().inflate(R.layout.sidebar, null);
+        @SuppressLint("InflateParams") View SideBarView = getLayoutInflater().inflate(R.layout.sidebar, null);
         final PopupWindow SideBar_pop = new PopupWindow(SideBarView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         final BlurView bg_sidebar = SideBarView.findViewById(R.id.bg_sidebar);
         final ImageView btn_setting_sidebar = SideBarView.findViewById(R.id.btn_setting_sidebar);
 
-        btn_setting_sidebar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ShowSettingDialog();
-            }
-        });
+        btn_setting_sidebar.setOnClickListener(view -> ShowSettingDialog());
 
         BlurTheLayout(bg_sidebar, 10);
         SideBar_pop.setAnimationStyle(android.R.style.Animation_Dialog);
@@ -1018,10 +966,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void GetTime(TextView txt) {
-        Calendar calander = null;
-        calander = Calendar.getInstance();
+        Calendar calendar = null;
+        calendar = Calendar.getInstance();
         @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh : mm a");
-        txt.setText(simpleDateFormat.format(calander.getTime()));
+        txt.setText(simpleDateFormat.format(calendar.getTime()));
     }
 
     public class Task_Adapter extends BaseAdapter {

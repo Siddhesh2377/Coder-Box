@@ -35,6 +35,11 @@
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"/>
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -51,6 +56,13 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".FileManagerActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".SetUpActivity"
             android:exported="true">
             <intent-filter>
@@ -58,11 +70,8 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Main Activity -->
-        <!--StartUp Activity -->
-
+        </activity> <!-- Main Activity -->
+        <!-- StartUp Activity -->
         <activity
             android:name=".MainActivity"
             android:configChanges="screenSize|keyboardHidden|smallestScreenSize|screenLayout"
@@ -76,9 +85,7 @@
 
         <uses-library
             android:name="org.apache.http.legacy"
-            android:required="false" />
-
-        <!-- Floating Dock Tile Service -->
+            android:required="false" /> <!-- Floating Dock Tile Service -->
         <service
             android:name=".DarkServices.FloatingDockService"
             android:exported="true"
